@@ -45,6 +45,20 @@ jobs:
           SDK_PLATFORM: ${{ steps.toolchain.outputs.platform }}
           NDK_VERSION: ${{ steps.toolchain.outputs.ndk }}
         run: sdkmanager "platforms;android-$SDK_PLATFORM" "ndk;$NDK_VERSION"
+      - name: Restore pinned Cargo tools
+        id: tools-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/lomo/cargo-tools
+          key: lomo-arm64-tools-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('rust-toolchain.toml', 'quality/tools.toml') }}
+      - name: Bootstrap pinned toolchain
+        run: cargo run --manifest-path Cargo.toml --locked -p lomo-xtask -- bootstrap
+      - name: Cache pinned Cargo tools
+        if: steps.tools-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/lomo/cargo-tools
+          key: ${{ steps.tools-cache.outputs.cache-primary-key }}
       - name: Build and validate arm64-v8a Debug APK
         run: cargo run --manifest-path Cargo.toml --locked -p lomo-xtask -- build android debug arm64-v8a
       - name: Upload APK
