@@ -6,6 +6,8 @@ import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
 import com.lomo.app.R
 import com.lomo.app.TrustedLaunchIntents
+import com.lomo.app.WidgetDestination
+import com.lomo.app.createOpenDestinationIntent
 
 class AndroidDynamicShortcutPublisher(
     private val context: Context,
@@ -13,11 +15,11 @@ class AndroidDynamicShortcutPublisher(
 ) : DynamicShortcutPublisher {
     override fun publishExternalEntryShortcuts() {
         val shortcutManager = context.getSystemService(ShortcutManager::class.java) ?: return
-        val managedShortcutIds = setOf(NEW_MEMO_SHORTCUT_ID, START_RECORDING_SHORTCUT_ID)
-        shortcutManager.dynamicShortcuts =
-            shortcutManager.dynamicShortcuts
-                .filterNot { shortcut -> shortcut.id in managedShortcutIds } +
-            listOf(newMemoShortcut(), recordingShortcut())
+        val managedShortcutIds = setOf(NEW_MEMO_SHORTCUT_ID, START_RECORDING_SHORTCUT_ID, SEARCH_SHORTCUT_ID)
+        val otherShortcuts = shortcutManager.dynamicShortcuts.filterNot { shortcut -> shortcut.id in managedShortcutIds }
+        val availableSlots = (shortcutManager.maxShortcutCountPerActivity - otherShortcuts.size).coerceAtLeast(0)
+        val shortcuts = listOf(::newMemoShortcut, ::recordingShortcut, ::searchShortcut)
+        shortcutManager.dynamicShortcuts = otherShortcuts + shortcuts.take(availableSlots).map { build -> build() }
     }
 
     private fun newMemoShortcut(): ShortcutInfo = ShortcutInfo
@@ -36,8 +38,16 @@ class AndroidDynamicShortcutPublisher(
         .setIntent(trustedLaunchIntents.trustedShortcutStartRecordingIntent())
         .build()
 
+    private fun searchShortcut(): ShortcutInfo = ShortcutInfo
+        .Builder(context, SEARCH_SHORTCUT_ID)
+        .setShortLabel(context.getString(R.string.shortcut_search_label))
+        .setIcon(Icon.createWithResource(context, R.drawable.ic_shortcut_search))
+        .setIntent(createOpenDestinationIntent(context, WidgetDestination.SEARCH))
+        .build()
+
     private companion object {
         const val NEW_MEMO_SHORTCUT_ID = "new_memo"
         const val START_RECORDING_SHORTCUT_ID = "start_recording"
+        const val SEARCH_SHORTCUT_ID = "search"
     }
 }

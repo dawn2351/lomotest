@@ -164,7 +164,7 @@
         <service
             android:name=".widget.NewMemoTileService"
             android:exported="true"
-            android:icon="@drawable/ic_note_add"
+            android:icon="@drawable/ic_lomo_tile"
             android:label="@string/tile_new_memo_label"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>

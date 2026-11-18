@@ -9,6 +9,7 @@ import androidx.core.net.toUri
 import com.lomo.app.MainActivity
 import com.lomo.app.TrustedLaunchIntents
 import com.lomo.app.WidgetDestination
+import com.lomo.app.createOpenDestinationIntent
 import com.lomo.domain.model.RecordingDeepLink
 import org.koin.core.context.GlobalContext
 import timber.log.Timber
@@ -102,13 +103,6 @@ internal fun createWidgetOpenMemoMainIntent(context: Context, memoId: String): I
         addFlags(WIDGET_MAIN_LAUNCH_FLAGS)
     }
 
-internal fun createWidgetOpenDestinationMainIntent(context: Context, destination: WidgetDestination): Intent =
-    Intent(context, MainActivity::class.java).apply {
-        action = MainActivity.ACTION_OPEN_DESTINATION
-        putExtra(MainActivity.EXTRA_WIDGET_DESTINATION, destination.name)
-        addFlags(WIDGET_MAIN_LAUNCH_FLAGS)
-    }
-
 internal fun createWidgetDefaultMainIntent(context: Context): Intent = Intent(context, MainActivity::class.java).apply {
     action = Intent.ACTION_MAIN
     addCategory(Intent.CATEGORY_LAUNCHER)
@@ -149,7 +143,7 @@ class WidgetLaunchActivity : Activity() {
             target = target,
             createMemo = { trustedIntents.trustedWidgetCreateMemoIntent() },
             startRecording = { trustedIntents.trustedWidgetStartRecordingIntent() },
-            openDestination = { destination -> createWidgetOpenDestinationMainIntent(this, destination) },
+            openDestination = { destination -> createOpenDestinationIntent(this, destination) },
             openMemo = { memoId -> createWidgetOpenMemoMainIntent(this, memoId) },
             defaultMain = { createWidgetDefaultMainIntent(this) },
         )

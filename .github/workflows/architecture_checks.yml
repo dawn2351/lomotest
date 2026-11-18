@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - '**'
+      - '!build/android-arm64'
     tags-ignore:
       - 'v*'
       - 'tui-v*'

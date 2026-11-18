@@ -1,0 +1,55 @@
+name: Build Android arm64 APK
+
+on:
+  push:
+    branches:
+      - build/android-arm64
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Read Android toolchain versions
+        id: toolchain
+        run: |
+          set -euo pipefail
+          module=apps/android/app/module.yaml
+          jdk=$(awk '/^    jdk:$/ { in_jdk = 1; next } in_jdk && /^      version:/ { print $2; exit }' "$module")
+          api=$(awk '/^      apiLevel:/ { print $2; exit }' "$module")
+          minor=$(awk '/^      minorApiLevel:/ { print $2; exit }' "$module")
+          ndk=$(sed -n 's/^pub const NDK_VERSION: &str = "\([^"]*\)";$/\1/p' crates/lomo-xtask/src/workspace.rs)
+          test -n "$jdk"
+          test -n "$api"
+          test -n "$ndk"
+          if [[ -n "$minor" ]]; then
+            api="$api.$minor"
+          fi
+          printf 'jdk=%s\nplatform=%s\nndk=%s\n' "$jdk" "$api" "$ndk" >> "$GITHUB_OUTPUT"
+      - name: Set up JDK
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        with:
+          distribution: zulu
+          java-version: ${{ steps.toolchain.outputs.jdk }}
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+      - name: Install Android SDK platform and NDK
+        env:
+          SDK_PLATFORM: ${{ steps.toolchain.outputs.platform }}
+          NDK_VERSION: ${{ steps.toolchain.outputs.ndk }}
+        run: sdkmanager "platforms;android-$SDK_PLATFORM" "ndk;$NDK_VERSION"
+      - name: Build and validate arm64-v8a Debug APK
+        run: cargo run --manifest-path Cargo.toml --locked -p lomo-xtask -- build android debug arm64-v8a
+      - name: Upload APK
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lomo-android-arm64-v8a
+          path: target/lomo/artifacts/android/debug/Lomo-*-arm64-v8a.apk
+          if-no-files-found: error
