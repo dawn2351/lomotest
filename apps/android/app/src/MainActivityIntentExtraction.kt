@@ -33,6 +33,13 @@ internal fun extractPendingLaunchActions(intent: Intent?): List<PendingLaunchAct
         Intent.ACTION_SEND_MULTIPLE,
         -> extractShareLaunchActions(intent)
 
+        Intent.ACTION_PROCESS_TEXT ->
+            intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)
+                ?.toString()
+                ?.takeIf(String::isNotBlank)
+                ?.let { text -> listOf(PendingLaunchAction.SharedText(text)) }
+                .orEmpty()
+
         MainActivity.ACTION_OPEN_MEMO ->
             intent.getStringExtra(RecordingDeepLink.EXTRA_MEMO_ID)
                 ?.takeIf(String::isNotBlank)

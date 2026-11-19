@@ -508,6 +508,9 @@
     <string name="trash_clear_confirm_title">Clear trash?</string>
     <string name="trash_clear_confirm_message">This will permanently delete all memos in trash.</string>
     <string name="action_copy">Copy</string>
+    <string name="action_quote">Quote</string>
+    <string name="memo_quote_header">Quoted note ·</string>
+    <string name="memo_quote_failed">Could not open the note to quote it.</string>
     <string name="action_share_menu">Share</string>
     <string name="action_share">Share as image</string>
     <string name="action_share_text">Share as text</string>

@@ -117,6 +117,7 @@ internal fun NavGraphBuilder.addGalleryReelDestination(
                         navController.popBackStackToMainOrNavigate()
                     },
                     onDeleteMemo = mainViewModel.deleteMemo,
+                    onNavigateToMain = { navController.popBackStackToMainOrNavigate() },
                     onLanShare =
                     if (lanShareEnabled) {
                         { request -> navigateToShare(request.content, request.timestamp) }

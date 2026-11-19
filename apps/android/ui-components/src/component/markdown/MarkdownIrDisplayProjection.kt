@@ -35,8 +35,7 @@ sealed interface MarkdownIrBlockDisplay {
 
     data object ThematicBreak : MarkdownIrBlockDisplay
 
-    /** Rows are pre-joined display lines (header first); cell styling is not rendered today. */
-    data class Table(val rows: List<String>) : MarkdownIrBlockDisplay
+    data class Table(val header: List<Paragraph>, val rows: List<List<Paragraph>>) : MarkdownIrBlockDisplay
 
     data class HtmlBlock(val literal: String) : MarkdownIrBlockDisplay
 }
@@ -74,13 +73,7 @@ internal fun buildMarkdownIrBlockDisplay(
     block: MarkdownRenderBlock,
     completedTask: Boolean = false,
 ): MarkdownIrBlockDisplay = when (block) {
-    is MarkdownRenderBlock.Paragraph -> {
-        val projection = projectParagraphMedia(block.inlines)
-        MarkdownIrBlockDisplay.Paragraph(
-            text = projection.text.withTaskCompletion(completedTask),
-            images = projection.images,
-        )
-    }
+    is MarkdownRenderBlock.Paragraph -> projectMarkdownParagraph(block.inlines, completedTask)
 
     is MarkdownRenderBlock.Heading ->
         MarkdownIrBlockDisplay.Heading(
@@ -117,13 +110,22 @@ internal fun buildMarkdownIrBlockDisplay(
 
     is MarkdownRenderBlock.Table ->
         MarkdownIrBlockDisplay.Table(
-            rows =
-            (listOf(block.header) + block.rows).map { row ->
-                row.joinToString(" | ") { cell -> cell.inlines.toPlainText() }
-            },
+            header = block.header.map { cell -> projectMarkdownParagraph(cell.inlines, completedTask) },
+            rows = block.rows.map { row -> row.map { cell -> projectMarkdownParagraph(cell.inlines, completedTask) } },
         )
 
     is MarkdownRenderBlock.HtmlBlock -> MarkdownIrBlockDisplay.HtmlBlock(literal = block.literal)
+}
+
+private fun projectMarkdownParagraph(
+    inlines: List<MarkdownRenderInline>,
+    completedTask: Boolean,
+): MarkdownIrBlockDisplay.Paragraph {
+    val projection = projectParagraphMedia(inlines)
+    return MarkdownIrBlockDisplay.Paragraph(
+        text = projection.text.withTaskCompletion(completedTask),
+        images = projection.images,
+    )
 }
 
 private fun buildMarkdownIrListItemDisplay(item: MarkdownRenderListItem, marker: String): MarkdownIrListItemDisplay =

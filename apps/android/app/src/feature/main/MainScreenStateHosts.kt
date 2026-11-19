@@ -30,6 +30,7 @@ import com.lomo.app.feature.conflict.SyncConflictDialogController
 import com.lomo.app.feature.conflict.SyncConflictStateHost
 import com.lomo.app.feature.conflict.SyncConflictStateHostBindings
 import com.lomo.app.feature.image.ImageViewerRequest
+import com.lomo.app.feature.memo.MemoEditorController
 import com.lomo.app.feature.memo.MemoEditorHostBindings
 import com.lomo.app.feature.memo.MemoMenuSelection
 import com.lomo.app.feature.memo.rememberMemoEditorController
@@ -40,8 +41,6 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -142,22 +141,23 @@ internal fun rememberMainScreenHostState(): MainScreenHostState {
 @OptIn(FlowPreview::class)
 @Composable
 internal fun MainScreenDraftAutosaveEffect(
-    editorController: com.lomo.app.feature.memo.MemoEditorController,
+    editorController: MemoEditorController,
     onSaveDraft: (String) -> Unit,
 ) {
     LaunchedEffect(editorController) {
-        snapshotFlow {
-            DraftAutosaveState(
-                editingMemoId = editorController.editingMemo?.id,
-                text = editorController.inputValue.text,
-                isVisible = editorController.isVisible,
-            )
-        }.debounce(DRAFT_AUTOSAVE_DEBOUNCE_MILLIS)
-            .distinctUntilChanged()
-            .filter { state -> state.editingMemoId == null && state.isVisible }
-            .map { state -> state.text }
-            .collect { text -> onSaveDraft(text) }
+        snapshotFlow { editorController.currentCreateDraftForAutosave() }
+            .debounce { draft -> if (draft == null) 0L else DRAFT_AUTOSAVE_DEBOUNCE_MILLIS }
+            .collect { draft ->
+                if (draft != null && draft == editorController.currentCreateDraftForAutosave()) {
+                    onSaveDraft(draft.text)
+                }
+            }
     }
+}
+
+internal fun MemoEditorController.currentCreateDraftForAutosave(): DraftAutosaveState? {
+    if (!isVisible || editingSession != null || !submission.canDismiss) return null
+    return DraftAutosaveState(editorToken = focusRequestToken, text = inputState.text.toString())
 }
 
 @Composable

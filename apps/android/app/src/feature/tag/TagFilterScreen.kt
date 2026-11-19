@@ -126,6 +126,7 @@ fun TagFilterScreen(
                 customFontPath = appPreferences.customFontPath,
             ),
             onEditMemo = openFullMemoEditor,
+            onNavigateToMain = onNavigateToMain,
             onDeleteMemo = viewModel::deleteMemo,
             onLanShare =
             if (lanShareEnabled) {

@@ -326,7 +326,7 @@ private fun MainScreenPendingNewMemoCreationEffect(
     }
 }
 
-internal data class DraftAutosaveState(val editingMemoId: String?, val text: String, val isVisible: Boolean)
+internal data class DraftAutosaveState(val editorToken: Long, val text: String)
 
 internal data class MainScreenUiSnapshot(
     val searchQuery: String,

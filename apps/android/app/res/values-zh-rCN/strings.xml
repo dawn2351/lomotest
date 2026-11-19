@@ -496,6 +496,9 @@
     <string name="trash_clear_confirm_title">清空回收站？</string>
     <string name="trash_clear_confirm_message">此操作会永久删除回收站中的所有备忘录。</string>
     <string name="action_copy">复制</string>
+    <string name="action_quote">引用</string>
+    <string name="memo_quote_header">引用笔记 ·</string>
+    <string name="memo_quote_failed">无法读取要引用的笔记。</string>
     <string name="action_share_menu">分享</string>
     <string name="action_share">分享为图片</string>
     <string name="action_share_text">分享文本</string>

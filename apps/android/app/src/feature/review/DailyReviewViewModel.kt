@@ -78,12 +78,6 @@ class DailyReviewViewModel(dependencies: DailyReviewViewModelDependencies) : Vie
     private val dailyReviewQueryUseCase = dependencies.dailyReviewQueryUseCase
     private val dailyReviewSessionUseCase = dependencies.dailyReviewSessionUseCase
     private val reviewData = MutableStateFlow<DailyReviewData>(DailyReviewData.Loading)
-    val restoredPageIndex: StateFlow<Int> = reviewData.map { publication ->
-        when (publication) {
-            is DailyReviewData.Loaded -> publication.session.pageIndex
-            DailyReviewData.Loading, is DailyReviewData.Failed -> 0
-        }
-    }.stateIn(viewModelScope, appWhileSubscribed(), 0)
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
     private val memoUpdater = DailyReviewMemoUpdater(updateMemoContentUseCase, ::updateVisibleMemoContent)
@@ -229,7 +223,8 @@ class DailyReviewViewModel(dependencies: DailyReviewViewModelDependencies) : Vie
 
     fun onPageChanged(pageIndex: Int) {
         val current = reviewData.value as? DailyReviewData.Loaded ?: return
-        val session = current.session.copy(pageIndex = pageIndex.coerceAtLeast(0))
+        if (pageIndex !in current.memos.indices || pageIndex == current.session.pageIndex) return
+        val session = current.session.copy(pageIndex = pageIndex)
         reviewData.value = current.copy(session = session)
         viewModelScope.launch {
             dailyReviewSessionUseCase.updateCurrentPage(session.seed, session.pageIndex, session.options)

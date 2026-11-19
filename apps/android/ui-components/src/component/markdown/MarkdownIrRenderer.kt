@@ -1,10 +1,13 @@
 package com.lomo.ui.component.markdown
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
@@ -16,7 +19,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.lomo.domain.model.MediaClass
 import com.lomo.domain.model.markdown.MarkdownRenderDocument
@@ -176,14 +181,50 @@ private fun MarkdownIrBlockDisplay(display: MarkdownIrBlockDisplay, context: Mar
 
         is MarkdownIrBlockDisplay.ThematicBreak -> HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-        is MarkdownIrBlockDisplay.Table ->
-            Column(modifier = Modifier.fillMaxWidth()) {
-                display.rows.forEach { row ->
-                    Text(row)
-                }
-            }
+        is MarkdownIrBlockDisplay.Table -> MarkdownIrTable(display, context)
 
         is MarkdownIrBlockDisplay.HtmlBlock -> Text(display.literal, modifier = Modifier.fillMaxWidth())
+    }
+}
+
+@Composable
+private fun MarkdownIrTable(table: MarkdownIrBlockDisplay.Table, context: MarkdownIrRenderContext) {
+    val headerStyle = MaterialTheme.typography.memoBodyTextStyle().copy(fontWeight = FontWeight.SemiBold)
+    val columnCount = maxOf(table.header.size, table.rows.maxOfOrNull { it.size } ?: 0)
+    Column(
+        modifier = Modifier.fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .width(MarkdownTableCellWidth * columnCount)
+            .padding(vertical = 4.dp),
+    ) {
+        MarkdownIrTableRow(
+            cells = table.header,
+            context = context,
+            style = headerStyle,
+            modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainerHigh),
+        )
+        table.rows.forEach { row ->
+            HorizontalDivider()
+            MarkdownIrTableRow(cells = row, context = context)
+        }
+    }
+}
+
+private val MarkdownTableCellWidth = 144.dp
+
+@Composable
+private fun MarkdownIrTableRow(
+    cells: List<MarkdownIrBlockDisplay.Paragraph>,
+    context: MarkdownIrRenderContext,
+    modifier: Modifier = Modifier,
+    style: TextStyle? = null,
+) {
+    Row(modifier = modifier) {
+        cells.forEach { cell ->
+            Column(modifier = Modifier.width(MarkdownTableCellWidth).padding(horizontal = 10.dp, vertical = 8.dp)) {
+                MarkdownIrParagraph(cell.text, cell.mediaGroups, context, style)
+            }
+        }
     }
 }
 
@@ -231,11 +272,12 @@ private fun MarkdownIrParagraph(
     text: AnnotatedString,
     mediaGroups: List<kotlinx.collections.immutable.ImmutableList<MarkdownPresentationImage>>,
     context: MarkdownIrRenderContext,
+    style: TextStyle? = null,
 ) {
     if (text.isNotEmpty()) {
         MDText(
             text = text,
-            style = null,
+            style = style,
             enableTextSelection = context.enableTextSelection,
             selectionRegistrar = context.textSelectionRegistrar,
             onTapFeedback = context.onTextTapFeedback,

@@ -19,6 +19,7 @@ import kotlinx.collections.immutable.toImmutableList
 enum class MemoActionId {
     EDIT,
     COPY,
+    QUOTE,
     PIN,
     JUMP,
     SHARE_MENU,
@@ -55,6 +56,9 @@ internal fun memoMenuActionLayout(handler: MemoMenuCommandHandler): List<MemoMen
     add(MemoMenuActionSlot(MemoActionId.COPY, ActionItemPlacement.Tile))
     add(MemoMenuActionSlot(contextActionId, ActionItemPlacement.Tile))
     add(MemoMenuActionSlot(MemoActionId.SHARE_MENU, ActionItemPlacement.Tile, subSlots = shareSubSlots))
+    if (handler.hasQuoteMemo) {
+        add(MemoMenuActionSlot(MemoActionId.QUOTE, ActionItemPlacement.Capsule))
+    }
     if (handler.hasVersionHistory) {
         add(MemoMenuActionSlot(MemoActionId.HISTORY, ActionItemPlacement.Capsule))
     }
@@ -87,6 +91,7 @@ internal fun rememberMemoMenuActions(
 @ReadOnlyComposable
 private fun rememberMemoMenuActionLabels(isPinned: Boolean): MemoMenuActionLabels = MemoMenuActionLabels(
     copy = stringResource(R.string.action_copy),
+    quote = stringResource(R.string.action_quote),
     shareMenu = stringResource(R.string.action_share_menu),
     shareImage = stringResource(R.string.action_share),
     shareText = stringResource(R.string.action_share_text),
@@ -177,6 +182,13 @@ private fun memoMenuLeafItem(
                 { lifecycle.hideAndConsume { commandHandler.copy(selection, labels.clipboardLabel) } },
             )
 
+        MemoActionId.QUOTE ->
+            buildItem(
+                LomoIcons.Article,
+                labels.quote,
+                { lifecycle.hideAndConsume { commandHandler.quote(selection) } },
+            )
+
         MemoActionId.PIN ->
             buildItem(
                 if (selection.memo.isPinned) LomoIcons.KeepFilled else LomoIcons.Keep,
@@ -263,11 +275,12 @@ private fun benchmarkMemoActionAnchor(actionId: MemoActionId): String? = when (a
     MemoActionId.EDIT -> BenchmarkAnchorContract.MEMO_ACTION_EDIT
     MemoActionId.DELETE -> BenchmarkAnchorContract.MEMO_ACTION_DELETE
     MemoActionId.LAN_SHARE -> BenchmarkAnchorContract.MEMO_ACTION_LAN_SHARE
-    MemoActionId.SHARE_TEXT, MemoActionId.JUMP -> null
+    MemoActionId.SHARE_TEXT, MemoActionId.JUMP, MemoActionId.QUOTE -> null
 }
 
 private data class MemoMenuActionLabels(
     val copy: String,
+    val quote: String,
     val shareMenu: String,
     val shareImage: String,
     val shareText: String,
