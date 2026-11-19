@@ -181,7 +181,7 @@ private fun ManageTagRow(tag: MemoTagCount, editable: Boolean, onOpen: () -> Uni
     var showMenu by remember { mutableStateOf(false) }
     Surface(onClick = onOpen) {
         ListItem(
-            headlineContent = { Text("#${tag.name}") },
+            content = { Text("#${tag.name}") },
             supportingContent = { Text(tag.count.toString()) },
             trailingContent = {
                 Box {
