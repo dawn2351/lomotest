@@ -71,9 +71,7 @@ fun FormatsSettingsSection(
 @Composable
 fun MigrationSettingsSection(
     operationState: SettingsMigrationOperationState,
-    onExportNotesArchive: () -> Unit,
-    onImportNotesArchive: () -> Unit,
-    externalPickers: MigrationPickerActions,
+    migrationPickers: MigrationPickerActions,
     onOpenExportSettingsPasswordDialog: () -> Unit,
     onOpenImportSettingsPasswordDialog: () -> Unit,
 ) {
@@ -86,7 +84,7 @@ fun MigrationSettingsSection(
                 subtitle = stringResource(R.string.settings_migration_export_notes_subtitle),
                 icon = LomoIcons.Download,
                 enabled = !running,
-                onClick = onExportNotesArchive,
+                onClick = migrationPickers.exportNotesArchive,
             )
         }
         item {
@@ -95,7 +93,7 @@ fun MigrationSettingsSection(
                 subtitle = stringResource(R.string.settings_migration_import_notes_subtitle),
                 icon = LomoIcons.Description,
                 enabled = !running,
-                onClick = onImportNotesArchive,
+                onClick = migrationPickers.importNotesArchive,
             )
         }
         item {
@@ -104,7 +102,7 @@ fun MigrationSettingsSection(
                 subtitle = stringResource(R.string.settings_import_flomo_hint),
                 icon = LomoIcons.Download,
                 enabled = !running,
-                onClick = externalPickers.importFlomo,
+                onClick = migrationPickers.importFlomo,
             )
         }
         item {
@@ -140,11 +138,11 @@ fun MigrationSettingsSection(
             onDismiss = { showWeReadImport = false },
             onImportText = { text ->
                 showWeReadImport = false
-                externalPickers.importWeReadText(text)
+                migrationPickers.importWeReadText(text)
             },
             onOpenFile = {
                 showWeReadImport = false
-                externalPickers.importWeRead()
+                migrationPickers.importWeRead()
             },
         )
     }
