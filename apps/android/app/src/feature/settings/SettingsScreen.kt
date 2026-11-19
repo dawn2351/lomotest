@@ -85,6 +85,9 @@ data class StoragePickerActions(
 data class MigrationPickerActions(
     val exportNotesArchive: () -> Unit,
     val importNotesArchive: () -> Unit,
+    val importFlomo: () -> Unit,
+    val importWeRead: () -> Unit,
+    val importWeReadText: (String) -> Unit,
     val exportEncryptedSettings: (String) -> Unit,
     val importEncryptedSettings: (String) -> Unit,
 )

@@ -220,6 +220,7 @@ private fun GalleryScreenMenuContent(
                 onBackClick()
             },
             onDeleteMemo = onDeleteMemo,
+            onNavigateToMain = onNavigateToMain,
             onLanShare =
             if (lanShareEnabled) {
                 { request -> onNavigateToShare(request.content, request.timestamp) }

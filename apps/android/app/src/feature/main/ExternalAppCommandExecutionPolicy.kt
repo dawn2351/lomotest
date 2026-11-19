@@ -8,6 +8,8 @@ import com.lomo.app.ExternalAppCommandTerminalResult
 internal data class ExternalAppCommandReadiness(
     val appReady: Boolean,
     val voiceDirectoryConfigured: Boolean,
+    val imageDirectoryConfigured: Boolean,
+    val editingExistingMemo: Boolean,
     val editorVisible: Boolean,
     val canOpenDraftEditor: Boolean,
     val hasRecordAudioPermission: Boolean,
@@ -18,6 +20,8 @@ internal data class ExternalAppCommandReadiness(
 
 internal enum class ExternalAppCommandStep {
     RequestVoiceDirectory,
+    RequestImageDirectory,
+    TakePhoto,
     OpenDraftEditor,
     EnsureEditorVisible,
     RequestRecordAudioPermission,
@@ -45,6 +49,8 @@ internal fun planExternalAppCommandExecution(
                 readiness = readiness,
             )
 
+        ExternalAppCommandAction.TakePhoto -> planTakePhotoCommand(command.status, readiness)
+
         ExternalAppCommandAction.StartRecording ->
             planStartRecordingCommand(
                 status = command.status,
@@ -66,6 +72,25 @@ private fun planCreateMemoCommand(
     val editorStep = editorTargetStep(status = status, readiness = readiness) ?: return waitForEditor(status)
     return ExternalAppCommandExecutionPlan(
         steps = listOf(editorStep),
+        terminalResult = ExternalAppCommandTerminalResult.Executed,
+    )
+}
+
+private fun planTakePhotoCommand(
+    status: ExternalAppCommandStatus,
+    readiness: ExternalAppCommandReadiness,
+): ExternalAppCommandExecutionPlan {
+    if (!readiness.imageDirectoryConfigured) {
+        return waitFor(
+            status = ExternalAppCommandStatus.WaitingForImageDirectory,
+            currentStatus = status,
+            firstWaitStep = ExternalAppCommandStep.RequestImageDirectory,
+        )
+    }
+    if (readiness.editingExistingMemo) return waitForEditor(status)
+    val step = editorTargetStep(status, readiness) ?: return waitForEditor(status)
+    return ExternalAppCommandExecutionPlan(
+        steps = listOf(step, ExternalAppCommandStep.TakePhoto),
         terminalResult = ExternalAppCommandTerminalResult.Executed,
     )
 }

@@ -86,6 +86,8 @@ private fun quickBallRecordingCommand(): ExternalAppCommand = ExternalAppCommand
 private fun recordingReadiness(permission: Boolean = true): ExternalAppCommandReadiness = ExternalAppCommandReadiness(
     appReady = true,
     voiceDirectoryConfigured = true,
+    imageDirectoryConfigured = true,
+    editingExistingMemo = false,
     editorVisible = false,
     canOpenDraftEditor = true,
     hasRecordAudioPermission = permission,

@@ -20,12 +20,13 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.util.Locale
 
-private const val WIDGET_PREVIEW_SCHEMA_VERSION = 1
+private const val WIDGET_PREVIEW_SCHEMA_VERSION = 2
 private const val WIDGET_PREVIEW_STAMP_FILE_NAME = "widget-preview-stamp.txt"
 private const val WIDGET_PREVIEW_TEMP_SUFFIX = ".tmp"
 
 internal enum class WidgetPreviewTarget {
     QUICK_NOTES,
+    CAPTURE,
     TASKS,
     INSIGHTS,
     REVIEW,
@@ -156,6 +157,7 @@ class AndroidWidgetPreviewPublisher(
 
 private fun WidgetPreviewTarget.receiverClass(): Class<out AppWidgetProvider> = when (this) {
     WidgetPreviewTarget.QUICK_NOTES -> LomoWidgetReceiver::class.java
+    WidgetPreviewTarget.CAPTURE -> LomoCaptureWidgetReceiver::class.java
     WidgetPreviewTarget.TASKS -> LomoTasksWidgetReceiver::class.java
     WidgetPreviewTarget.INSIGHTS -> LomoInsightsWidgetReceiver::class.java
     WidgetPreviewTarget.REVIEW -> LomoReviewWidgetReceiver::class.java
@@ -163,6 +165,7 @@ private fun WidgetPreviewTarget.receiverClass(): Class<out AppWidgetProvider> = 
 
 private fun WidgetPreviewTarget.glanceWidget(): GlanceAppWidget = when (this) {
     WidgetPreviewTarget.QUICK_NOTES -> LomoWidget()
+    WidgetPreviewTarget.CAPTURE -> LomoCaptureWidget()
     WidgetPreviewTarget.TASKS -> LomoTasksWidget()
     WidgetPreviewTarget.INSIGHTS -> LomoInsightsWidget()
     WidgetPreviewTarget.REVIEW -> LomoReviewWidget()

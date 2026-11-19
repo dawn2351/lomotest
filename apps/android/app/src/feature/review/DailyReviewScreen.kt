@@ -24,7 +24,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -95,7 +95,6 @@ fun DailyReviewScreen(
     val imageMap by viewModel.imageMap.collectAsStateWithLifecycle()
     val stableImageMap = remember(imageMap) { imageMap.toImmutableMap() }
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
-    val restoredPageIndex by viewModel.restoredPageIndex.collectAsStateWithLifecycle()
     val haptic = LocalAppHapticFeedback.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -154,7 +153,6 @@ fun DailyReviewScreen(
             DailyReviewScreenContent(
                 onRetry = viewModel.retry,
                 uiState = uiState,
-                restoredPageIndex = restoredPageIndex,
                 dateFormat = appPreferences.dateFormat,
                 timeFormat = appPreferences.timeFormat,
                 doubleTapEditEnabled = appPreferences.doubleTapEditEnabled,
@@ -166,7 +164,6 @@ fun DailyReviewScreen(
                 onNavigateToImage = onNavigateToImage,
                 onLoadMore = viewModel::loadMore,
                 onPageChanged = viewModel::onPageChanged,
-                haptic = haptic,
             )
         }
     }
@@ -259,7 +256,6 @@ private fun DailyReviewScreenScaffold(
 private fun DailyReviewScreenContent(
     onRetry: () -> Unit,
     uiState: DailyReviewScreenState,
-    restoredPageIndex: Int,
     dateFormat: String,
     timeFormat: String,
     doubleTapEditEnabled: Boolean,
@@ -271,7 +267,6 @@ private fun DailyReviewScreenContent(
     onNavigateToImage: (ImageViewerRequest) -> Unit,
     onLoadMore: () -> Unit,
     onPageChanged: (Int) -> Unit,
-    haptic: com.lomo.ui.util.AppHapticFeedback,
 ) {
     Box(
         modifier =
@@ -322,21 +317,22 @@ private fun DailyReviewScreenContent(
                             ),
                         )
                     } else {
-                        DailyReviewPager(
-                            memos = remember(memos) { memos.toImmutableList() },
-                            restoredPageIndex = restoredPageIndex,
-                            dateFormat = dateFormat,
-                            timeFormat = timeFormat,
-                            doubleTapEditEnabled = doubleTapEditEnabled,
-                            freeTextCopyEnabled = freeTextCopyEnabled,
-                            onShowMenu = onShowMenu,
-                            onOpenEditor = onOpenEditor,
-                            onTodoClick = onTodoClick,
-                            onNavigateToImage = onNavigateToImage,
-                            onRequestMore = onLoadMore,
-                            onPageChanged = onPageChanged,
-                            haptic = haptic,
-                        )
+                        key(state.options) {
+                            DailyReviewPager(
+                                memos = remember(memos) { memos.toImmutableList() },
+                                initialPageIndex = state.pageIndex,
+                                dateFormat = dateFormat,
+                                timeFormat = timeFormat,
+                                doubleTapEditEnabled = doubleTapEditEnabled,
+                                freeTextCopyEnabled = freeTextCopyEnabled,
+                                onShowMenu = onShowMenu,
+                                onOpenEditor = onOpenEditor,
+                                onTodoClick = onTodoClick,
+                                onNavigateToImage = onNavigateToImage,
+                                onRequestMore = onLoadMore,
+                                onPageChanged = onPageChanged,
+                            )
+                        }
                     }
                 }
             }
@@ -347,7 +343,7 @@ private fun DailyReviewScreenContent(
 @Composable
 private fun DailyReviewPager(
     memos: ImmutableList<com.lomo.app.feature.main.MemoUiModel>,
-    restoredPageIndex: Int,
+    initialPageIndex: Int,
     dateFormat: String,
     timeFormat: String,
     doubleTapEditEnabled: Boolean,
@@ -358,28 +354,17 @@ private fun DailyReviewPager(
     onNavigateToImage: (ImageViewerRequest) -> Unit,
     onRequestMore: () -> Unit,
     onPageChanged: (Int) -> Unit,
-    haptic: com.lomo.ui.util.AppHapticFeedback,
 ) {
-    val pagerState = rememberPagerState(initialPage = 0, pageCount = { memos.size })
-    var previousPage by remember { mutableIntStateOf(0) }
+    val pagerState = rememberPagerState(
+        initialPage = initialPageIndex.coerceIn(memos.indices),
+        pageCount = { memos.size },
+    )
 
-    LaunchedEffect(restoredPageIndex, memos.size) {
-        if (memos.isEmpty()) {
-            return@LaunchedEffect
-        }
-        val targetPage = restoredPageIndex.coerceIn(0, memos.lastIndex)
-        if (pagerState.currentPage != targetPage) {
-            pagerState.scrollToPage(targetPage)
-        }
-    }
-
-    LaunchedEffect(pagerState.currentPage, memos.size) {
-        if (pagerState.currentPage != previousPage) {
-            previousPage = pagerState.currentPage
-            haptic.light()
-        }
-        onPageChanged(pagerState.currentPage)
-        if (pagerState.currentPage > 0 && pagerState.currentPage == memos.lastIndex) {
+    val settledPage = pagerState.settledPage
+    LaunchedEffect(settledPage, memos.size) {
+        if (settledPage !in memos.indices) return@LaunchedEffect
+        onPageChanged(settledPage)
+        if (settledPage > 0 && settledPage == memos.lastIndex) {
             onRequestMore()
         }
     }
@@ -387,6 +372,7 @@ private fun DailyReviewPager(
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         HorizontalPager(
             state = pagerState,
+            key = { memos[it].memo.id },
             contentPadding = PaddingValues(horizontal = AppSpacing.Large),
             pageSpacing = AppSpacing.Medium,
             modifier =
@@ -547,4 +533,5 @@ private fun rememberDailyReviewMenuCommands(
         )
     },
     onVersionHistory = onVersionHistory,
+    onNavigateToMain = onNavigateToMain,
 )

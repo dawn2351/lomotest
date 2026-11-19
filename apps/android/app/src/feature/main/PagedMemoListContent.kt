@@ -30,7 +30,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.LazyPagingItems
 import com.lomo.app.R
@@ -47,6 +50,7 @@ import com.lomo.ui.component.common.lomoListItemMotion
 import com.lomo.ui.component.common.lomoListItemPhaseMotion
 import com.lomo.ui.component.common.rememberLomoListEnterState
 import com.lomo.ui.component.common.rememberLomoListExitState
+import com.lomo.ui.theme.AdaptiveContentWidths
 import com.lomo.ui.theme.LocalLomoMotion
 import com.lomo.ui.theme.adaptiveContentWidth
 import com.lomo.ui.util.LocalAppHapticFeedback
@@ -60,6 +64,7 @@ private data class MemoPagedListDisplayConfig(
     val timeFormat: String,
     val doubleTapEditEnabled: Boolean,
     val freeTextCopyEnabled: Boolean,
+    val bottomSpacing: Dp,
 )
 
 private data class MemoPagedListActions(
@@ -517,7 +522,7 @@ private fun MemoPagedListItem(
 ) {
     MemoListItem(
         uiModel = uiModel,
-        bottomSpacing = MEMO_LIST_ITEM_SPACING,
+        bottomSpacing = displayConfig.bottomSpacing,
         onTodoClick = onTodoClick,
         onReminderClick =
         createMainReminderDoneClickAction(
@@ -580,12 +585,15 @@ private fun PagedMemoLazyColumn(
             deletingIds = deletingIds,
             scrollbarItemCount = scrollbarItemCount,
         )
+    val windowSize = LocalWindowInfo.current.containerSize
+    val wide = with(LocalDensity.current) { windowSize.width.toDp() >= AdaptiveContentWidths.Panel }
     val displayConfig =
         MemoPagedListDisplayConfig(
             dateFormat = dateFormat,
             timeFormat = timeFormat,
             doubleTapEditEnabled = doubleTapEditEnabled,
             freeTextCopyEnabled = freeTextCopyEnabled,
+            bottomSpacing = if (wide) 12.dp else MEMO_LIST_ITEM_SPACING,
         )
     val actions =
         MemoPagedListActions(

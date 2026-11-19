@@ -67,6 +67,11 @@
                 <data android:mimeType="image/*" />
             </intent-filter>
 
+            <intent-filter>
+                <action android:name="android.intent.action.PROCESS_TEXT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
         </activity>
 
         <activity
@@ -159,6 +164,23 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/lomo_review_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.WidgetReviewRefreshReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".widget.LomoCaptureWidgetReceiver"
+            android:exported="false"
+            android:label="@string/widget_capture_label"
+            android:process=":widget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/lomo_capture_widget_info" />
         </receiver>
 
         <service

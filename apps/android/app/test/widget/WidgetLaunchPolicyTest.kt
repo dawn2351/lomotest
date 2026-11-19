@@ -79,6 +79,7 @@ class WidgetLaunchPolicyTest : AppFunSpec() {
             var recordCalls = 0
             val createResult = FakeLaunchIntent(kind = "fresh-create")
             val recordResult = FakeLaunchIntent(kind = "fresh-record")
+            val photoResult = FakeLaunchIntent(kind = "fresh-photo")
             val destResult = FakeLaunchIntent(kind = "dest")
             val memoResult = FakeLaunchIntent(kind = "memo")
             val defaultResult = FakeLaunchIntent(kind = "default")
@@ -91,6 +92,7 @@ class WidgetLaunchPolicyTest : AppFunSpec() {
                         createResult
                     },
                     startRecording = { recordResult },
+                    takePhoto = { photoResult },
                     openDestination = { destResult },
                     openMemo = { memoResult },
                     defaultMain = { defaultResult },
@@ -103,6 +105,7 @@ class WidgetLaunchPolicyTest : AppFunSpec() {
                         createResult
                     },
                     startRecording = { recordResult },
+                    takePhoto = { photoResult },
                     openDestination = { destResult },
                     openMemo = { memoResult },
                     defaultMain = { defaultResult },
@@ -115,11 +118,23 @@ class WidgetLaunchPolicyTest : AppFunSpec() {
                         recordCalls += 1
                         recordResult
                     },
+                    takePhoto = { photoResult },
                     openDestination = { destResult },
                     openMemo = { memoResult },
                     defaultMain = { defaultResult },
                 )
 
+            val photo = buildWidgetTargetMainIntent(
+                target = WidgetLaunchTarget.TakePhoto,
+                createMemo = { createResult },
+                startRecording = { recordResult },
+                takePhoto = { photoResult },
+                openDestination = { destResult },
+                openMemo = { memoResult },
+                defaultMain = { defaultResult },
+            )
+
+            photo shouldBe photoResult
             first shouldBe createResult
             second shouldBe createResult
             createCalls shouldBe 2

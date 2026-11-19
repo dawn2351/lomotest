@@ -20,17 +20,11 @@ class StartupMaintenanceUseCase(
     suspend fun initializeRootDirectory(): String? = initializeWorkspaceUseCase.currentRootLocation()?.raw
 
     suspend fun runDeferredStartupTasks(rootDir: String?, currentVersion: String) {
-        coroutineScope {
-            val imageWarmup =
-                launch {
-                    warmImageCacheOnStartup()
-                }
-            val inboxProcessing =
-                launch {
-                    processSyncInboxOnStartup()
-                }
-            imageWarmup.join()
-            inboxProcessing.join()
+        if (rootDir != null) {
+            coroutineScope {
+                launch { warmImageCacheOnStartup() }
+                launch { processSyncInboxOnStartup() }
+            }
         }
         resyncCachesIfAppVersionChanged(rootDir = rootDir, currentVersion = currentVersion)
     }

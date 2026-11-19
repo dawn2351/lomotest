@@ -66,6 +66,7 @@ internal fun MainScreenForegroundEffects(
     val appActionEvents by foregroundFlows.appActionEvents.collectAsStateWithLifecycle()
     val externalAppCommands by foregroundFlows.externalAppCommands.collectAsStateWithLifecycle()
     val voiceDirectory by foregroundFlows.voiceDirectory.collectAsStateWithLifecycle()
+    val imageDirectory by foregroundFlows.imageDirectory.collectAsStateWithLifecycle()
     val isRecording by recordingBindings.flows.isRecording.collectAsStateWithLifecycle()
     val recordingCaptureId by recordingBindings.flows.recordingCaptureId.collectAsStateWithLifecycle()
 
@@ -94,6 +95,7 @@ internal fun MainScreenForegroundEffects(
         externalAppCommands = remember(externalAppCommands) { externalAppCommands.toImmutableList() },
         uiState = uiState,
         voiceDirectoryConfigured = voiceDirectory != null,
+        imageDirectoryConfigured = imageDirectory != null,
         canOpenCreateMemo = canOpenCreateMemo,
         isRecording = isRecording,
         recordingCaptureId = recordingCaptureId,
@@ -109,6 +111,7 @@ internal fun MainScreenExternalAppCommandEffects(
     externalAppCommands: ImmutableList<ExternalAppCommand>,
     uiState: MainViewModel.MainScreenState,
     voiceDirectoryConfigured: Boolean,
+    imageDirectoryConfigured: Boolean,
     canOpenCreateMemo: Boolean,
     isRecording: Boolean,
     recordingCaptureId: String?,
@@ -154,6 +157,8 @@ internal fun MainScreenExternalAppCommandEffects(
         ExternalAppCommandReadiness(
             appReady = uiState is MainViewModel.MainScreenState.Ready,
             voiceDirectoryConfigured = voiceDirectoryConfigured,
+            imageDirectoryConfigured = imageDirectoryConfigured,
+            editingExistingMemo = editorController.editingSession != null,
             editorVisible = editorController.isVisible,
             canOpenDraftEditor = canOpenCreateMemo,
             hasRecordAudioPermission = hasRecordAudioPermission(),

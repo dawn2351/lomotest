@@ -105,6 +105,11 @@ internal class MainSidebarState(
         }
     }
 
+    fun openDockedPane() {
+        check(placement == MainSidebarPlacement.DockedPane)
+        dockedPaneShown.value = true
+    }
+
     /** Leaving the feed closes a modal drawer; a docked pane stays where the user put it. */
     suspend fun closeOverlay() {
         if (placement == MainSidebarPlacement.ModalDrawer) drawerState.close()

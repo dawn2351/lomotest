@@ -3,6 +3,9 @@ package com.lomo.app.feature.main
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitHorizontalTouchSlopOrCancellation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.displayCutout
@@ -31,13 +34,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.MultiContentMeasurePolicy
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -209,7 +216,7 @@ private fun MainScreenDrawerLayout(
         MainSidebarPlacement.DockedPane -> {
             val canvasColor = MaterialTheme.colorScheme.surface
             MainDockedSidebarLayout(
-                paneShown = sidebar.isDockedPaneShown,
+                sidebar = sidebar,
                 canvasColor = canvasColor,
                 pane = {
                     PermanentDrawerSheet(
@@ -240,11 +247,14 @@ private fun MainScreenDrawerLayout(
  */
 @Composable
 private fun MainDockedSidebarLayout(
-    paneShown: Boolean,
+    sidebar: MainSidebarState,
     canvasColor: Color,
     pane: @Composable () -> Unit,
     feed: @Composable () -> Unit,
 ) {
+    val paneShown = sidebar.isDockedPaneShown
+    val layoutDirection = LocalLayoutDirection.current
+    val swipe = if (paneShown) Modifier else Modifier.dockedSidebarSwipe(sidebar, layoutDirection)
     val paneVisibility =
         animateFloatAsState(
             targetValue = if (paneShown) 1f else 0f,
@@ -270,7 +280,7 @@ private fun MainDockedSidebarLayout(
                 }
             }
         }
-    Box(modifier = Modifier.fillMaxSize().background(canvasColor)) {
+    Box(modifier = Modifier.fillMaxSize().background(canvasColor).then(swipe)) {
         Layout(
             contents = listOf(pane, feed),
             modifier =
@@ -282,6 +292,22 @@ private fun MainDockedSidebarLayout(
         )
     }
 }
+
+private fun Modifier.dockedSidebarSwipe(sidebar: MainSidebarState, direction: LayoutDirection): Modifier =
+    pointerInput(sidebar, direction) {
+        val openingDirection = if (direction == LayoutDirection.Ltr) 1f else -1f
+        val edgeWidth = 40.dp.toPx()
+        awaitEachGesture {
+            val down = awaitFirstDown(requireUnconsumed = false)
+            val startDistance = if (direction == LayoutDirection.Ltr) down.position.x else size.width - down.position.x
+            if (startDistance <= edgeWidth) {
+                val motion = awaitHorizontalTouchSlopOrCancellation(down.id) { change, overSlop ->
+                    if (openingDirection * overSlop > 0f) change.consume()
+                }
+                if (motion != null) sidebar.openDockedPane()
+            }
+        }
+    }
 
 @Composable
 private fun MainModalSidebarLayout(
@@ -342,6 +368,7 @@ private fun MainScreenSidebarContent(
         onTagReorder = onTagReorder,
         onSettingsClick = actions.onSettings,
         onTrashClick = actions.onTrash,
+        onTagManagementClick = actions.onTagManagementClick,
         onDailyReviewClick = actions.onDailyReviewClick,
         onGalleryClick = actions.onGalleryClick,
         onStatisticsClick = actions.onStatisticsClick,

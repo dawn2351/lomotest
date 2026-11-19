@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onVisibilityChanged
 import androidx.compose.ui.platform.LocalContext
 import coil3.compose.AsyncImagePainter
 import coil3.compose.rememberAsyncImagePainter
@@ -88,6 +89,25 @@ internal fun MarkdownImageBlock(
         ),
 ) {
     val destination = image.destination
+    var shouldLoad by remember(destination) { mutableStateOf(false) }
+    if (!shouldLoad) {
+        val ratio = resolveMarkdownImageLayoutRatio(
+            cachedRatio = MarkdownImageCache.get(destination),
+            freshRatio = null,
+        )
+        ImageEmptyPlaceholder(
+            Modifier.onVisibilityChanged(minDurationMs = 80L, minFractionVisible = 0f) { visible ->
+                if (visible) shouldLoad = true
+            }.rememberImageBlockModifier(
+                ratio = ratio,
+                destination = destination,
+                onImageClick = null,
+                sharedModifier = Modifier,
+            ),
+        )
+        return
+    }
+
     val context = LocalContext.current
     val defaultContentDescription = stringResource(Res.string.markdown_image_content_description)
     val sizeResolver = rememberConstraintsSizeResolver()

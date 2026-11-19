@@ -48,5 +48,6 @@ internal fun rememberSearchMemoMenuCommandHandler(
             )
         },
         onVersionHistory = onVersionHistory,
+        onNavigateToMain = onNavigateToMain,
     )
 }

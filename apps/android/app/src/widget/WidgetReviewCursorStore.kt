@@ -36,8 +36,6 @@ internal class WidgetReviewCursorStore(
     private val file: File,
     private val dispatcherProvider: DispatcherProvider = DefaultDispatcherProvider(),
 ) {
-    private val fileMutex = Mutex()
-
     suspend fun readCursor(widgetKey: String): Int = withContext(dispatcherProvider.io) {
         fileMutex.withLock {
             readCursorLocked(widgetKey)
@@ -140,6 +138,7 @@ internal class WidgetReviewCursorStore(
     }
 }
 
+private val fileMutex = Mutex()
 private val cursorJson = Json { encodeDefaults = true }
 private const val WIDGET_CURSOR_BYTE_LIMIT = 16 * 1024
 private const val WIDGET_CURSOR_KEY_LIMIT = 64

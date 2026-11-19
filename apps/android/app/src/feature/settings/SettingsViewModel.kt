@@ -81,7 +81,7 @@ class SettingsViewModel(
             appConfigCoordinator = appConfigCoordinator,
             mount = coordinatorFactory.mount(),
             onError = { error ->
-                _operationError.value = errorMapper.map(error, "Failed to update storage settings")
+                _operationError.value = errorMapper.mapStorageFailure(error, "Failed to update storage settings")
             },
         )
     val displayFeature =

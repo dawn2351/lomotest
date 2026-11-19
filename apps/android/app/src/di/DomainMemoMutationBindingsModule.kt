@@ -1,5 +1,6 @@
 package com.lomo.app.di
 
+import com.lomo.domain.usecase.ChangeTagMemosUseCase
 import com.lomo.domain.usecase.CreateMemoUseCase
 import com.lomo.domain.usecase.DeleteMemoUseCase
 import com.lomo.domain.usecase.RecordingSessionUseCase
@@ -18,5 +19,6 @@ val domainMemoMutationModule = module {
     single { ToggleMemoCheckboxUseCase(workspaceRepository = get()) }
     single { UpdateMemoContentUseCase(get(), get()) }
     single { CreateMemoUseCase(get(), get(), get(), get()) }
+    single { ChangeTagMemosUseCase(get(), get(), get(), get(), get(), get(), get()) }
     single { RecordingSessionUseCase(get()) }
 }

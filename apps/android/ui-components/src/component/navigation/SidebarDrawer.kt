@@ -44,6 +44,7 @@ import com.lomo.ui.generated.resources.sidebar_daily_review
 import com.lomo.ui.generated.resources.sidebar_gallery
 import com.lomo.ui.generated.resources.sidebar_settings
 import com.lomo.ui.generated.resources.sidebar_statistics
+import com.lomo.ui.generated.resources.sidebar_tag_management
 import com.lomo.ui.generated.resources.sidebar_trash
 import com.lomo.ui.generated.resources.stat_day
 import com.lomo.ui.generated.resources.stat_memo
@@ -87,6 +88,7 @@ fun SidebarDrawer(
     rootTagOrder: ImmutableList<String> = kotlinx.collections.immutable.persistentListOf(),
     currentDestination: SidebarDestination = SidebarDestination.Memo,
     onTrashClick: () -> Unit = {},
+    onTagManagementClick: () -> Unit,
     onDailyReviewClick: () -> Unit = {},
     onGalleryClick: () -> Unit = {},
     onStatisticsClick: () -> Unit = {},
@@ -149,6 +151,7 @@ fun SidebarDrawer(
                 )
                 sidebarDestinations(
                     currentDestination = currentDestination,
+                    onTagManagementClick = onTagManagementClick,
                     onDailyReviewClick = onDailyReviewClick,
                     onGalleryClick = onGalleryClick,
                     onStatisticsClick = onStatisticsClick,
@@ -455,6 +458,7 @@ private fun LazyListScope.sidebarStatusHub(
 
 private fun LazyListScope.sidebarDestinations(
     currentDestination: SidebarDestination,
+    onTagManagementClick: () -> Unit,
     onDailyReviewClick: () -> Unit,
     onGalleryClick: () -> Unit,
     onStatisticsClick: () -> Unit,
@@ -496,6 +500,12 @@ private fun LazyListScope.sidebarDestinations(
                     isSelected = currentDestination == SidebarDestination.Statistics,
                     onClick = onStatisticsClick,
                     anchorTag = statisticsAnchorTag,
+                )
+                NavigationItem(
+                    icon = LomoIcons.Tag,
+                    label = org.jetbrains.compose.resources.stringResource(Res.string.sidebar_tag_management),
+                    isSelected = false,
+                    onClick = onTagManagementClick,
                 )
             }
         }

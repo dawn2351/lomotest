@@ -88,6 +88,11 @@ class TrustedLaunchIntents(private val context: Context, secretStore: TrustedLau
         source = ExternalAppCommandSource.Widget,
     )
 
+    fun trustedWidgetTakePhotoIntent(): Intent = trustedCommandIntent(
+        action = ExternalAppCommandAction.TakePhoto,
+        source = ExternalAppCommandSource.Widget,
+    )
+
     fun trustedWidgetStartRecordingIntent(): Intent = trustedCommandIntent(
         action = ExternalAppCommandAction.StartRecording,
         source = ExternalAppCommandSource.Widget,

@@ -98,7 +98,7 @@ class WidgetPreviewGenerationTest : AppFunSpec() {
             }
         }
 
-        test("on API 35, changed stamp publishes all 4 home-screen widgets and saves stamp") {
+        test("on API 35, changed stamp publishes each home-screen widget and saves stamp") {
             runTest {
                 var persistedStamp: String? = "old-stamp"
                 val publishedTargets = mutableListOf<WidgetPreviewTarget>()

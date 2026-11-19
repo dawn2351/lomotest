@@ -17,6 +17,7 @@ import com.lomo.app.feature.statistics.StatisticsViewModel
 import com.lomo.app.feature.synccenter.SyncCenterViewModel
 import com.lomo.app.feature.tag.TagFilterViewModel
 import com.lomo.app.feature.tag.TagFilterViewModelDependencies
+import com.lomo.app.feature.tag.TagManagementViewModel
 import com.lomo.app.feature.trash.TrashViewModel
 import com.lomo.app.feature.update.AppUpdateViewModel
 import com.lomo.app.navigation.LanShareAvailabilityViewModel
@@ -106,6 +107,7 @@ val viewModelModule = module {
     viewModelOf(::ShareViewModel)
     viewModelOf(::StatisticsViewModel)
     viewModelOf(::TagFilterViewModel)
+    viewModelOf(::TagManagementViewModel)
     viewModelOf(::TrashViewModel)
     viewModelOf(::AppUpdateViewModel)
     viewModelOf(::LanShareAvailabilityViewModel)

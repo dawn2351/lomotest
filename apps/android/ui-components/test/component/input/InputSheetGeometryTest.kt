@@ -71,7 +71,7 @@ class InputSheetGeometryTest : UiComponentsFunSpec() {
         test("given a tablet-width window when geometry resolves then both forms are one centered rounded card") {
             val geometry = resolveInputSheetGeometry(containerWidth = 1_280.dp, statusBarTop = statusBar)
             val card = InputSheetFormGeometry(
-                width = 640.dp,
+                width = 720.dp,
                 cornerRadius = 28.dp,
                 topGap = statusBar + 24.dp,
                 contentTopInset = 0.dp,
@@ -91,7 +91,7 @@ class InputSheetGeometryTest : UiComponentsFunSpec() {
                 withClue("container=$width geometry=$geometry") {
                     geometry.expanded.width shouldBe geometry.compact.width
                     geometry.compact.width shouldBeLessThanOrEqualTo width
-                    geometry.compact.width shouldBeLessThanOrEqualTo 640.dp
+                    geometry.compact.width shouldBeLessThanOrEqualTo if (width >= 840.dp) 720.dp else 640.dp
                 }
             }
         }

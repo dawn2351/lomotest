@@ -329,7 +329,10 @@ private fun QuickNotesMemoCard(context: Context, item: WidgetGlanceSnapshotItem,
             .fillMaxWidth()
             .background(WidgetLayeredCardSurface)
             .cornerRadius(WidgetCardCornerRadius)
-            .clickable(widgetLaunchAction(context, WidgetLaunchTarget.OpenMemo(item.id)))
+            .clickable(
+                onClick = widgetLaunchAction(context, WidgetLaunchTarget.OpenMemo(item.id)),
+                rippleOverride = R.drawable.widget_scroll_feedback,
+            )
             .padding(horizontal = 12.dp, vertical = 9.dp),
     ) {
         Row(

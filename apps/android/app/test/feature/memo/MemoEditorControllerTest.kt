@@ -37,12 +37,28 @@ package com.lomo.app.feature.memo
 
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import com.lomo.app.feature.main.currentCreateDraftForAutosave
 import com.lomo.app.testing.AppFunSpec
 import com.lomo.app.testing.verifiedEditSession
 import com.lomo.domain.model.Memo
 import io.kotest.matchers.shouldBe
 class MemoEditorControllerTest : AppFunSpec() {
     init {
+        test("a submitted editor buffer is ineligible for draft autosave") {
+            val controller = MemoEditorController()
+            controller.openForCreate("saved note")
+            val pending = checkNotNull(controller.currentCreateDraftForAutosave())
+            val submission = checkNotNull(controller.submission.begin())
+
+            controller.currentCreateDraftForAutosave() shouldBe null
+            controller.submission.commit(submission) shouldBe true
+            controller.currentCreateDraftForAutosave() shouldBe null
+
+            controller.openForCreate("saved note")
+            val reopened = checkNotNull(controller.currentCreateDraftForAutosave())
+            (reopened.editorToken != pending.editorToken) shouldBe true
+        }
+
         /*
          * Behavior Contract:
          * - Capability: Strict cursor-position attachment insertion.

@@ -49,6 +49,9 @@ internal constructor() {
     var isVisible by mutableStateOf(false)
         private set
 
+    internal var cameraCaptureRequested by mutableStateOf(false)
+        private set
+
     var focusRequestToken by mutableLongStateOf(0L)
         private set
 
@@ -150,6 +153,15 @@ internal constructor() {
         }
     }
 
+    internal fun requestCameraCapture() {
+        check(isVisible && editingSession == null) { "Widget photo requires a new-note editor" }
+        cameraCaptureRequested = true
+    }
+
+    internal fun consumeCameraCaptureRequest() {
+        cameraCaptureRequested = false
+    }
+
     fun close(): Boolean {
         if (!submission.canDismiss) return false
         resetSession()
@@ -158,6 +170,7 @@ internal constructor() {
 
     private fun resetSession() {
         isVisible = false
+        cameraCaptureRequested = false
         editingSession = null
         inputValue = TextFieldValue("")
         inputState.undoState.clearHistory()
@@ -216,6 +229,12 @@ fun MemoEditorSheetHost(
             onImageDirectoryMissing = session.onImageDirectoryMissing,
             onCameraCaptureError = session.onCameraCaptureError,
         )
+    LaunchedEffect(controller.cameraCaptureRequested) {
+        if (controller.cameraCaptureRequested) {
+            controller.consumeCameraCaptureRequest()
+            mediaActions.onCameraClick()
+        }
+    }
     val contentState =
         rememberMemoEditorContentState(
             controller = controller,

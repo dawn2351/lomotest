@@ -88,6 +88,7 @@ internal data class MainForegroundEffectFlows(
     val appActionEvents: StateFlow<List<PendingUiEvent<MainViewModel.AppAction>>>,
     val externalAppCommands: StateFlow<List<ExternalAppCommand>>,
     val voiceDirectory: StateFlow<String?>,
+    val imageDirectory: StateFlow<String?>,
 )
 
 /** Lifecycle callbacks updating external app command status in [MainViewModel]. */
@@ -276,6 +277,7 @@ private fun MainViewModel.buildEffectHostBindings(): MainEffectHostBindings = Ma
         appActionEvents = appActionEvents,
         externalAppCommands = externalAppCommands,
         voiceDirectory = voiceDirectory,
+        imageDirectory = imageDirectory,
     ),
     externalCommands =
     MainExternalCommandActions(

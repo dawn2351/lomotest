@@ -193,7 +193,7 @@ private class FakeMemoMutationRepository(private val restoreGate: CompletableDef
         onAccepted: (String) -> Unit,
     ): Memo = Memo(
         id = attempt.timestampMillis.toString(),
-        timestamp = attempt.timestampMillis,
+        timestamp = checkNotNull(attempt.timestampMillis),
         content = attempt.content,
         rawContent = attempt.content,
         dateKey = "test",

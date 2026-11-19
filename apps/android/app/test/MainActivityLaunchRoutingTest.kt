@@ -501,6 +501,21 @@ class MainActivityLaunchRoutingTest : AppFunSpec() {
             }
         }
 
+        test("text selection opens a new note with the selected text and ignores blank input") {
+            val selected = "Selected text\nsecond line"
+            val intent = TestIntent(
+                actionValue = Intent.ACTION_PROCESS_TEXT,
+                stringExtras = mapOf(Intent.EXTRA_PROCESS_TEXT to selected, Intent.EXTRA_TEXT to "other text"),
+            )
+            extractPendingLaunchActions(intent) shouldBe listOf(PendingLaunchAction.SharedText(selected))
+
+            val blank = TestIntent(
+                actionValue = Intent.ACTION_PROCESS_TEXT,
+                stringExtras = mapOf(Intent.EXTRA_PROCESS_TEXT to " "),
+            )
+            extractPendingLaunchActions(blank) shouldBe emptyList()
+        }
+
         test("extractPendingLaunchActions parses widget destination actions cleanly") {
             WidgetDestination.entries.forEach { destination ->
                 val intent =
@@ -566,6 +581,8 @@ private class TestIntent(private val actionValue: String, private val stringExtr
     }
 
     override fun getStringExtra(name: String): String? = mutableStringExtras[name]
+
+    override fun getCharSequenceExtra(name: String): CharSequence? = mutableStringExtras[name]
 
     override fun putExtra(name: String, value: String?): Intent {
         if (value == null) {

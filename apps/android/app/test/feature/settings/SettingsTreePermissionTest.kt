@@ -2,6 +2,7 @@ package com.lomo.app.feature.settings
 
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import com.lomo.app.testing.AppFunSpec
 import io.kotest.assertions.throwables.shouldThrow
@@ -48,7 +49,11 @@ class SettingsTreePermissionTest : AppFunSpec() {
             every { resolver.persistedUriPermissions } returns emptyList()
 
             shouldThrow<IllegalStateException> {
-                persistTreePermission(context, uri)
+                persistTreePermission(
+                    context,
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                )
             }.message shouldContain "saf_grant_not_persisted"
         }
     }

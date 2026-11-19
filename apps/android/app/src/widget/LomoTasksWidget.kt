@@ -243,7 +243,10 @@ private fun TaskWidgetRow(context: Context, task: WidgetGlanceTaskItem) {
             modifier =
             GlanceModifier
                 .defaultWeight()
-                .clickable(widgetLaunchAction(context, WidgetLaunchTarget.OpenMemo(task.memoId))),
+                .clickable(
+                    onClick = widgetLaunchAction(context, WidgetLaunchTarget.OpenMemo(task.memoId)),
+                    rippleOverride = R.drawable.widget_scroll_feedback,
+                ),
             maxLines = 1,
             style =
             TextStyle(

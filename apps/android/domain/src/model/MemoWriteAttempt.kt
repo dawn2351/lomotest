@@ -67,7 +67,8 @@ data class MemoCreateAttempt(
     /** The draft that staged this memo's media; its leases transfer to the operation on submit. */
     val draftId: DraftId,
     val content: String,
-    val timestampMillis: Long,
+    /** Source chronology, or null to let the workspace owner assign the creation date. */
+    val timestampMillis: Long?,
 )
 
 data class MemoUpdateAttempt(

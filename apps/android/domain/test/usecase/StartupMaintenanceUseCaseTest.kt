@@ -222,7 +222,7 @@ class StartupMaintenanceUseCaseTest : DomainFunSpec() {
             }
         }
 
-        test("runDeferredStartupTasks updates version without rebuild when root is missing") {
+        test("given no writable workspace when startup runs then only the version is updated") {
             runTest {
                 val directorySettingsRepository = FakeDirectorySettingsRepository()
                 val mediaRepository = FakeMediaRepository()
@@ -259,8 +259,8 @@ class StartupMaintenanceUseCaseTest : DomainFunSpec() {
 
                 useCase.runDeferredStartupTasks(rootDir = null, currentVersion = "0.9.1")
 
-                syncInboxRepository.syncRequests shouldBe listOf(UnifiedSyncOperation.PROCESS_PENDING_CHANGES)
-                mediaRepository.refreshImageLocationsCallCount shouldBe 1
+                syncInboxRepository.syncRequests shouldBe emptyList()
+                mediaRepository.refreshImageLocationsCallCount shouldBe 0
                 memoRepository.refreshMemosCallCount shouldBe 0
                 appVersionRepository.lastAppVersion shouldBe "0.9.1"
                 appVersionRepository.updatedVersions shouldBe listOf("0.9.1")

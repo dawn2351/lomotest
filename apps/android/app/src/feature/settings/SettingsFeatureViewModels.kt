@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 interface SettingsLanShareFeatureActions {
     val updateLanShareEnabled: (Boolean) -> Unit
@@ -230,6 +231,7 @@ private suspend fun performStorageUpdate(onError: (Throwable) -> Unit, operation
     } catch (cancellation: CancellationException) {
         throw cancellation
     } catch (error: Exception) {
+        Timber.w(error, "Storage settings update failed")
         onError(error)
     }
 }

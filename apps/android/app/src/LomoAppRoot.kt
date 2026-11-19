@@ -17,6 +17,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.lomo.app.benchmark.BenchmarkAnchorContract
+import com.lomo.app.feature.settings.BackupReminderDialogHost
 import com.lomo.app.feature.share.LanBatchApprovalDialog
 import com.lomo.app.feature.share.LanPairingConfirmationDialog
 import com.lomo.app.feature.update.AppUpdateViewModel
@@ -57,6 +58,10 @@ internal fun LomoAppRoot(
             onDismiss = appUpdateViewModel::dismissUpdateDialog,
             onStartInAppUpdate = appUpdateViewModel::startInAppUpdate,
             onOpenReleasePage = uriHandler::openUri,
+        )
+        BackupReminderDialogHost(
+            canShow = updateDialogState == null && progressDialogState == null &&
+                pendingPairing == null && incomingBatches.isEmpty(),
         )
         LomoAppUpdateProgressDialog(
             state = progressDialogState,

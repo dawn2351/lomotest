@@ -19,6 +19,7 @@ internal const val EXTRA_WIDGET_LAUNCH_DESTINATION = "com.lomo.app.widget.EXTRA_
 internal const val EXTRA_WIDGET_LAUNCH_MEMO_ID = "com.lomo.app.widget.EXTRA_LAUNCH_MEMO_ID"
 
 internal const val WIDGET_TARGET_CREATE_MEMO = "create_memo"
+internal const val WIDGET_TARGET_TAKE_PHOTO = "take_photo"
 internal const val WIDGET_TARGET_START_RECORDING = "start_recording"
 internal const val WIDGET_TARGET_OPEN_DESTINATION = "open_destination"
 internal const val WIDGET_TARGET_OPEN_MEMO = "open_memo"
@@ -32,6 +33,10 @@ internal sealed interface WidgetLaunchTarget {
 
     data object CreateMemo : WidgetLaunchTarget {
         override val routeKey: String = WIDGET_TARGET_CREATE_MEMO
+    }
+
+    data object TakePhoto : WidgetLaunchTarget {
+        override val routeKey: String = WIDGET_TARGET_TAKE_PHOTO
     }
 
     data object StartRecording : WidgetLaunchTarget {
@@ -57,6 +62,8 @@ internal fun resolveWidgetLaunchTarget(intent: Intent?): WidgetLaunchTarget {
         WIDGET_TARGET_CREATE_MEMO -> WidgetLaunchTarget.CreateMemo
 
         WIDGET_TARGET_START_RECORDING -> WidgetLaunchTarget.StartRecording
+
+        WIDGET_TARGET_TAKE_PHOTO -> WidgetLaunchTarget.TakePhoto
 
         WIDGET_TARGET_OPEN_DESTINATION -> {
             val destinationName = intent.getStringExtra(EXTRA_WIDGET_LAUNCH_DESTINATION)
@@ -85,12 +92,14 @@ internal fun buildWidgetTargetMainIntent(
     target: WidgetLaunchTarget,
     createMemo: () -> Intent,
     startRecording: () -> Intent,
+    takePhoto: () -> Intent,
     openDestination: (WidgetDestination) -> Intent,
     openMemo: (String) -> Intent,
     defaultMain: () -> Intent,
 ): Intent = when (target) {
     WidgetLaunchTarget.CreateMemo -> createMemo()
     WidgetLaunchTarget.StartRecording -> startRecording()
+    WidgetLaunchTarget.TakePhoto -> takePhoto()
     is WidgetLaunchTarget.OpenDestination -> openDestination(target.destination)
     is WidgetLaunchTarget.OpenMemo -> openMemo(target.memoId)
     WidgetLaunchTarget.DefaultMain -> defaultMain()
@@ -143,6 +152,7 @@ class WidgetLaunchActivity : Activity() {
             target = target,
             createMemo = { trustedIntents.trustedWidgetCreateMemoIntent() },
             startRecording = { trustedIntents.trustedWidgetStartRecordingIntent() },
+            takePhoto = { trustedIntents.trustedWidgetTakePhotoIntent() },
             openDestination = { destination -> createOpenDestinationIntent(this, destination) },
             openMemo = { memoId -> createWidgetOpenMemoMainIntent(this, memoId) },
             defaultMain = { createWidgetDefaultMainIntent(this) },
@@ -160,6 +170,9 @@ class WidgetLaunchActivity : Activity() {
                 when (target) {
                     WidgetLaunchTarget.CreateMemo ->
                         putExtra(EXTRA_WIDGET_LAUNCH_KIND, WIDGET_TARGET_CREATE_MEMO)
+
+                    WidgetLaunchTarget.TakePhoto ->
+                        putExtra(EXTRA_WIDGET_LAUNCH_KIND, WIDGET_TARGET_TAKE_PHOTO)
 
                     WidgetLaunchTarget.StartRecording ->
                         putExtra(EXTRA_WIDGET_LAUNCH_KIND, WIDGET_TARGET_START_RECORDING)

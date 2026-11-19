@@ -44,6 +44,7 @@ import com.lomo.data.repository.SyncInboxRepositoryImpl
 import com.lomo.data.repository.SyncStateResetRepositoryImpl
 import com.lomo.data.repository.TypographyPreferencesRepositoryImpl
 import com.lomo.data.repository.WorkspaceArchiveEdgeRepository
+import com.lomo.data.repository.importnotes.ExternalNotesImportRepositoryImpl
 import com.lomo.data.s3.S3CredentialStore
 import com.lomo.data.security.AppLockPreferenceSource
 import com.lomo.data.security.DataStoreAppLockPreferenceSource
@@ -52,10 +53,12 @@ import com.lomo.data.security.DefaultCredentialRepository
 import com.lomo.data.webdav.WebDavCredentialStore
 import com.lomo.domain.repository.AppConfigRepository
 import com.lomo.domain.repository.AppPreferencesSnapshotRepository
+import com.lomo.domain.repository.BackupReminderRepository
 import com.lomo.domain.repository.CredentialRepository
 import com.lomo.domain.repository.CustomFontStore
 import com.lomo.domain.repository.DailyReviewSessionRepository
 import com.lomo.domain.repository.DirectorySettingsRepository
+import com.lomo.domain.repository.ExternalNotesImportRepository
 import com.lomo.domain.repository.InteractionPreferencesRepository
 import com.lomo.domain.repository.MediaRepository
 import com.lomo.domain.repository.MemoCreateDraftRepository
@@ -80,6 +83,7 @@ import org.koin.dsl.binds
 import org.koin.dsl.module
 
 val coreDataRepositoryModule = module {
+    single<BackupReminderRepository> { get<LomoDataStore>() }
     singleOf(::ShareImageRepositoryImpl) bind ShareImageRepository::class
 
     single { LomoDataStore(androidContext(), get<com.lomo.domain.usecase.DispatcherProvider>().io) }
@@ -226,6 +230,16 @@ val coreDataRepositoryModule = module {
             dispatcherProvider = get(),
         )
     } bind MigrationArchiveRepository::class
+    single<ExternalNotesImportRepository> {
+        ExternalNotesImportRepositoryImpl(
+            androidContext(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+        )
+    }
 
     // Inbox
     single {

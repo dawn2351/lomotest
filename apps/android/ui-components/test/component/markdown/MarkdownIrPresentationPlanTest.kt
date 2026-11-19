@@ -674,7 +674,8 @@ class MarkdownIrPresentationPlanTest : UiComponentsFunSpec() {
             val table =
                 plan.items[2].shouldBeInstanceOf<MarkdownIrPresentationItem.Block>()
                     .display.shouldBeInstanceOf<MarkdownIrBlockDisplay.Table>()
-            table.rows shouldBe listOf("Head", "Cell")
+            table.header.map { it.text.text } shouldBe listOf("Head")
+            table.rows.map { row -> row.map { it.text.text } } shouldBe listOf(listOf("Cell"))
         }
 
         test("given a plan built once when items are read twice then the same display instances are reused") {
