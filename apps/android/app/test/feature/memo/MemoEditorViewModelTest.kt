@@ -569,7 +569,7 @@ class MemoEditorViewModelTest : AppFunSpec() {
             onAccepted: (String) -> Unit,
         ): Memo {
             val content = attempt.content
-            val timestampMillis = attempt.timestampMillis
+            val timestampMillis = checkNotNull(attempt.timestampMillis)
             attemptedCreates += attempt
             onAccepted(timestampMillis.toString())
             createMemoGate?.await()

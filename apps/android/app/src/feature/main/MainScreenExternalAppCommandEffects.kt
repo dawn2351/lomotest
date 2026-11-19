@@ -69,6 +69,10 @@ private fun executeExternalAppCommandPlan(
         when (step) {
             ExternalAppCommandStep.RequestVoiceDirectory -> directoryGuideController.requestVoice()
 
+            ExternalAppCommandStep.RequestImageDirectory -> directoryGuideController.requestImage()
+
+            ExternalAppCommandStep.TakePhoto -> editorController.requestCameraCapture()
+
             ExternalAppCommandStep.OpenDraftEditor -> editorController.openForCreate(draftText.value)
 
             ExternalAppCommandStep.EnsureEditorVisible -> editorController.ensureVisible()

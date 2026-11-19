@@ -18,7 +18,10 @@ class FakeMemoMutationRepository(private val store: FakeMemoStore) : MemoMutatio
     override suspend fun saveMemo(
         attempt: com.lomo.domain.model.MemoCreateAttempt,
         onAccepted: (String) -> Unit,
-    ): Memo = store.addSavedMemo(attempt.content, attempt.timestampMillis).also { onAccepted(it.id) }
+    ): Memo = store.addSavedMemo(
+        attempt.content,
+        attempt.timestampMillis ?: System.currentTimeMillis(),
+    ).also { onAccepted(it.id) }
 
     override suspend fun updateMemo(attempt: com.lomo.domain.model.MemoUpdateAttempt) =
         store.replaceMemoContent(attempt.snapshot.memo, attempt.content)

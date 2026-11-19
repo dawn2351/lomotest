@@ -30,6 +30,7 @@ import com.lomo.app.feature.share.ShareScreen
 import com.lomo.app.feature.synccenter.SyncCenterRoute
 import com.lomo.app.feature.synccenter.SyncCenterViewModel
 import com.lomo.app.feature.tag.TagFilterScreen
+import com.lomo.app.feature.tag.TagManagementScreen
 import com.lomo.app.feature.trash.TrashScreen
 import com.lomo.app.util.activityKoinViewModel
 import com.lomo.domain.model.Memo
@@ -219,12 +220,20 @@ private fun NavGraphBuilder.addSharedTransitionDestinations(
             onNavigateToSearch = { navController.navigate(NavRoute.Search) },
             onNavigateToTag = { tag -> navController.navigate(NavRoute.Tag(tag)) },
             onNavigateToImage = navigateToImage,
+            onNavigateToTagManagement = { navController.navigate(NavRoute.TagManagement) },
             onNavigateToDailyReview = { navController.navigate(NavRoute.DailyReview) },
             onNavigateToGallery = { navController.navigate(NavRoute.Gallery) },
             onNavigateToStatistics = { navController.navigate(NavRoute.Statistics) },
             onNavigateToShare = navigateToShare,
             lanShareEnabled = lanShareEnabled,
             foregroundEntryId = mainForegroundEntryId,
+        )
+    }
+
+    composable<NavRoute.TagManagement> {
+        TagManagementScreen(
+            onBack = popBackStackSafely,
+            onOpenTag = { tag -> navController.navigate(NavRoute.Tag(tag)) },
         )
     }
 

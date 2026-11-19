@@ -17,6 +17,7 @@ const val EXTERNAL_APP_COMMAND_TTL_MILLIS: Long = 10 * 60 * 1_000L
 @Serializable
 enum class ExternalAppCommandAction {
     CreateMemo,
+    TakePhoto,
     StartRecording,
     StopRecording,
 }
@@ -34,6 +35,7 @@ enum class ExternalAppCommandStatus {
     Pending,
     WaitingForRoot,
     WaitingForVoiceDirectory,
+    WaitingForImageDirectory,
     WaitingForEditor,
     WaitingForRecordAudioPermission,
 

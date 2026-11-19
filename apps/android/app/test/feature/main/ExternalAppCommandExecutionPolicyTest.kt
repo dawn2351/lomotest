@@ -85,6 +85,31 @@ class ExternalAppCommandExecutionPolicyTest : AppFunSpec() {
                 )
         }
 
+        test("given a photo widget tap when image storage is available then open a new note and capture") {
+            val photo = command(ExternalAppCommandAction.TakePhoto, ExternalAppCommandStatus.Pending)
+            planExternalAppCommandExecution(photo, readiness()) shouldBe ExternalAppCommandExecutionPlan(
+                steps = listOf(ExternalAppCommandStep.OpenDraftEditor, ExternalAppCommandStep.TakePhoto),
+                terminalResult = ExternalAppCommandTerminalResult.Executed,
+            )
+        }
+
+        test("given an existing memo is being edited when photo is requested then wait for a new note") {
+            val photo = command(ExternalAppCommandAction.TakePhoto, ExternalAppCommandStatus.Pending)
+            val editing = readiness(editorVisible = true).copy(editingExistingMemo = true)
+            planExternalAppCommandExecution(photo, editing) shouldBe ExternalAppCommandExecutionPlan(
+                statusUpdate = ExternalAppCommandStatus.WaitingForEditor,
+            )
+        }
+
+        test("given missing image storage when photo is requested then request configuration") {
+            val photo = command(ExternalAppCommandAction.TakePhoto, ExternalAppCommandStatus.Pending)
+            val missingStorage = readiness().copy(imageDirectoryConfigured = false)
+            planExternalAppCommandExecution(photo, missingStorage) shouldBe ExternalAppCommandExecutionPlan(
+                statusUpdate = ExternalAppCommandStatus.WaitingForImageDirectory,
+                steps = listOf(ExternalAppCommandStep.RequestImageDirectory),
+            )
+        }
+
         test("given missing voice storage when start planned then request setup and wait") {
             planExternalAppCommandExecution(
                 command = command(
@@ -238,6 +263,8 @@ private fun readiness(
 ): ExternalAppCommandReadiness = ExternalAppCommandReadiness(
     appReady = appReady,
     voiceDirectoryConfigured = voiceDirectoryConfigured,
+    imageDirectoryConfigured = true,
+    editingExistingMemo = false,
     editorVisible = editorVisible,
     canOpenDraftEditor = canOpenDraftEditor,
     hasRecordAudioPermission = hasRecordAudioPermission,

@@ -140,10 +140,7 @@ internal fun rememberMainScreenHostState(): MainScreenHostState {
 
 @OptIn(FlowPreview::class)
 @Composable
-internal fun MainScreenDraftAutosaveEffect(
-    editorController: MemoEditorController,
-    onSaveDraft: (String) -> Unit,
-) {
+internal fun MainScreenDraftAutosaveEffect(editorController: MemoEditorController, onSaveDraft: (String) -> Unit) {
     LaunchedEffect(editorController) {
         snapshotFlow { editorController.currentCreateDraftForAutosave() }
             .debounce { draft -> if (draft == null) 0L else DRAFT_AUTOSAVE_DEBOUNCE_MILLIS }
@@ -197,6 +194,7 @@ internal fun MainScreenContentHost(
     onNavigateToSearch: () -> Unit,
     onNavigateToTag: (String) -> Unit,
     onNavigateToImage: (ImageViewerRequest) -> Unit,
+    onNavigateToTagManagement: () -> Unit,
     onNavigateToDailyReview: () -> Unit,
     onNavigateToGallery: () -> Unit,
     onNavigateToStatistics: () -> Unit,
@@ -245,6 +243,7 @@ internal fun MainScreenContentHost(
             onNavigateToSearch = onNavigateToSearch,
             onNavigateToTag = onNavigateToTag,
             onNavigateToImage = onNavigateToImage,
+            onNavigateToTagManagement = onNavigateToTagManagement,
             onNavigateToDailyReview = onNavigateToDailyReview,
             onNavigateToGallery = onNavigateToGallery,
             onNavigateToStatistics = onNavigateToStatistics,
@@ -285,6 +284,7 @@ private fun MainScreenNavigationContent(
     onNavigateToSearch: () -> Unit,
     onNavigateToTag: (String) -> Unit,
     onNavigateToImage: (ImageViewerRequest) -> Unit,
+    onNavigateToTagManagement: () -> Unit,
     onNavigateToDailyReview: () -> Unit,
     onNavigateToGallery: () -> Unit,
     onNavigateToStatistics: () -> Unit,
@@ -329,6 +329,7 @@ private fun MainScreenNavigationContent(
         onNavigateToSearch = onNavigateToSearch,
         onNavigateToTag = onNavigateToTag,
         onNavigateToImage = onNavigateToImage,
+        onNavigateToTagManagement = onNavigateToTagManagement,
         onNavigateToDailyReview = onNavigateToDailyReview,
         onNavigateToGallery = onNavigateToGallery,
         onNavigateToStatistics = onNavigateToStatistics,

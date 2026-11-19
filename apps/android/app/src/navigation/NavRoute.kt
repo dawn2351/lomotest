@@ -10,6 +10,7 @@ internal object NavRouteSerialNames {
     const val TRASH = "trash"
     const val SEARCH = "search"
     const val TAG = "tag"
+    const val TAG_MANAGEMENT = "tagManagement"
     const val IMAGE_VIEWER = "imageViewer"
     const val DAILY_REVIEW = "dailyReview"
     const val GALLERY = "gallery"
@@ -40,6 +41,10 @@ sealed interface NavRoute {
     @Serializable
     @SerialName(NavRouteSerialNames.TAG)
     data class Tag(val tagName: String) : NavRoute
+
+    @Serializable
+    @SerialName(NavRouteSerialNames.TAG_MANAGEMENT)
+    data object TagManagement : NavRoute
 
     @Serializable
     @SerialName(NavRouteSerialNames.IMAGE_VIEWER)

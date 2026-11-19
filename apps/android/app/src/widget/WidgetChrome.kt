@@ -191,13 +191,14 @@ internal fun WidgetActionIconButton(
     iconTint: ColorProvider = GlanceTheme.colors.onSecondaryContainer,
     sizeDp: Dp = 32.dp,
     iconSizeDp: Dp = 17.dp,
+    cornerRadius: Dp = 16.dp,
 ) {
     Box(
         modifier =
         GlanceModifier
             .size(sizeDp)
             .background(containerColor)
-            .cornerRadius(16.dp)
+            .cornerRadius(cornerRadius)
             .clickable(onClick),
         contentAlignment = Alignment.Center,
     ) {

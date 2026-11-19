@@ -3,6 +3,7 @@ package com.lomo.ui.component.input
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
+import com.lomo.ui.theme.AdaptiveContentWidths
 import kotlin.math.roundToInt
 
 /**
@@ -39,7 +40,12 @@ internal data class InputSheetGeometry(val compact: InputSheetFormGeometry, val 
  * purely vertical, so text never reflows mid-motion and the measure stays readable.
  */
 internal fun resolveInputSheetGeometry(containerWidth: Dp, statusBarTop: Dp): InputSheetGeometry {
-    val width = minOf(containerWidth, InputSheetTokens.MaxWidth)
+    val maximum = if (containerWidth >= AdaptiveContentWidths.Panel) {
+        AdaptiveContentWidths.Reading
+    } else {
+        InputSheetTokens.MaxWidth
+    }
+    val width = minOf(containerWidth, maximum)
     if (width < containerWidth) {
         val card =
             InputSheetFormGeometry(

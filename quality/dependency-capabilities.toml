@@ -86,6 +86,7 @@ schema_version = 1
 "com.jakewharton.timber:timber" = ["platform"]
 "com.materialkolor:material-color-utilities" = ["portable"]
 "com.squareup.okio:okio" = ["filesystem"]
+"org.jsoup:jsoup" = ["portable"]
 "dev.detekt:detekt-api" = ["portable"]
 "dev.chrisbanes.haze:haze" = ["ui", "platform"]
 "dev.chrisbanes.haze:haze-blur" = ["ui", "platform"]

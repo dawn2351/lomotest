@@ -12,6 +12,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
+import com.lomo.data.repository.BackupReminderRepositoryImpl
 import com.lomo.data.util.PreferenceKeys
 import com.lomo.data.webdav.WebDavCredentialStore
 import com.lomo.domain.model.AppPreferenceSnapshotField
@@ -24,6 +25,7 @@ import com.lomo.domain.model.StorageLocation
 import com.lomo.domain.model.StorageTimestampFormats
 import com.lomo.domain.model.SyncBackendType
 import com.lomo.domain.model.WorkspaceRootTransition
+import com.lomo.domain.repository.BackupReminderRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -485,6 +487,7 @@ class LomoDataStore private constructor(private val dataStore: DataStore<Prefere
     LomoSnapshotPreferencesStore by SnapshotPreferencesStoreImpl(dataStore),
     LomoAppVersionStore by AppVersionStoreImpl(dataStore),
     LomoReminderPreferencesStore by ReminderPreferencesStoreImpl(dataStore),
+    BackupReminderRepository by BackupReminderRepositoryImpl(dataStore),
     LomoGitSyncBehaviorStore by GitSyncBehaviorStoreImpl(dataStore),
     LomoGitIdentityStore by GitIdentityStoreImpl(dataStore),
     LomoWebDavConnectionStore by WebDavConnectionStoreImpl(dataStore),

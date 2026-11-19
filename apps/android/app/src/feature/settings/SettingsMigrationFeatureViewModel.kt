@@ -1,6 +1,9 @@
 package com.lomo.app.feature.settings
 
 import com.lomo.app.util.runSuspendCatching
+import com.lomo.domain.model.ExternalNotesImportSummary
+import com.lomo.domain.model.ExternalNotesSource
+import com.lomo.domain.repository.ExternalNotesImportRepository
 import com.lomo.domain.usecase.ExportAllNotesArchiveUseCase
 import com.lomo.domain.usecase.ExportEncryptedSettingsUseCase
 import com.lomo.domain.usecase.ImportAllNotesArchiveUseCase
@@ -33,6 +36,8 @@ sealed interface SettingsMigrationOperationState {
         val summary: MigrationArchiveSummary = MigrationArchiveSummary(),
         val settingsSummary: MigrationSettingsSummary = MigrationSettingsSummary(),
     ) : SettingsMigrationOperationState
+
+    data class ExternalNotesImported(val summary: ExternalNotesImportSummary) : SettingsMigrationOperationState
 
     data class Error(val kind: SettingsMigrationOperationKind, val message: String) : SettingsMigrationOperationState
 }
@@ -74,6 +79,16 @@ class SettingsMigrationFeatureViewModel(
         }
     }
 
+    fun importExternalNotes(
+        repository: ExternalNotesImportRepository,
+        source: ExternalNotesSource,
+        openInput: () -> InputStream?,
+    ) {
+        runMigration(SettingsMigrationOperationKind.IMPORT_NOTES) {
+            SettingsMigrationOperationState.ExternalNotesImported(repository.importNotes(source, openInput))
+        }
+    }
+
     fun exportEncryptedSettings(password: String, openOutput: () -> OutputStream?) {
         runMigration(SettingsMigrationOperationKind.EXPORT_SETTINGS) {
             val summary =
@@ -106,8 +121,9 @@ class SettingsMigrationFeatureViewModel(
 
     private fun runMigration(
         kind: SettingsMigrationOperationKind,
-        block: suspend () -> SettingsMigrationOperationState.Success,
+        block: suspend () -> SettingsMigrationOperationState,
     ) {
+        if (_operationState.value is SettingsMigrationOperationState.Running) return
         _operationState.value = SettingsMigrationOperationState.Running(kind)
         scope.launch {
             _operationState.value =

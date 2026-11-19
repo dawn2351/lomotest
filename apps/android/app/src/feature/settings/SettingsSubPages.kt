@@ -126,6 +126,8 @@ private fun SyncBackupSettingsBody(
             onOpenMemoAgeDialog = { dialogState.showMemoSnapshotAgeDialog = true },
         )
 
+        BackupReminderSettingsSection()
+
         // Migration (Export/Import)
         MigrationSettingsSection(
             operationState = migrationOperationState,
@@ -306,6 +308,7 @@ private fun rememberMigrationPickersForSubPages(migrationPickers: MigrationPicke
         MigrationPickers(
             onExportNotesArchive = migrationPickers.exportNotesArchive,
             onImportNotesArchive = migrationPickers.importNotesArchive,
+            externalPickers = migrationPickers,
         )
     }
 

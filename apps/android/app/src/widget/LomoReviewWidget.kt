@@ -1,5 +1,6 @@
 package com.lomo.app.widget
 
+import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
@@ -11,14 +12,11 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.LocalSize
-import androidx.glance.action.ActionParameters
-import androidx.glance.action.actionParametersOf
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.PreviewSizeMode
 import androidx.glance.appwidget.SizeMode
-import androidx.glance.appwidget.action.ActionCallback
-import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.action.actionSendBroadcast
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
@@ -78,6 +76,7 @@ class LomoReviewWidget : GlanceAppWidget() {
                     snapshot = snapshot,
                     selection = selection,
                     today = today,
+                    appWidgetId = resolveAppWidgetId(id),
                 )
             }
         }
@@ -96,6 +95,7 @@ class LomoReviewWidget : GlanceAppWidget() {
                     snapshot = snapshot,
                     selection = selection,
                     today = today,
+                    appWidgetId = null,
                 )
             }
         }
@@ -108,20 +108,9 @@ class LomoReviewWidgetReceiver : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
         dispatcher.onReceive(this, context, intent) { super.onReceive(context, intent) }
-    }
-}
-
-class CycleWidgetReviewAction : ActionCallback {
-    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
-        val snapshot = readWidgetRenderSnapshot(context)
-        if (snapshot.availability != WidgetSnapshotAvailability.READY || snapshot.reviews.isEmpty()) {
-            return
+        if (intent.action == AppWidgetManager.ACTION_APPWIDGET_UPDATE) {
+            context.sendBroadcast(reviewWidgetRefreshIntent(context))
         }
-        val appWidgetId = resolveAppWidgetId(glanceId) ?: return
-        WidgetReviewCursorStore(
-            file = context.filesDir.resolve(WIDGET_REVIEW_CURSOR_FILE_NAME),
-        ).advanceCursor(widgetKey = appWidgetId.toString(), totalCount = snapshot.reviews.size)
-        WidgetUpdater.updateReviewWidget(context = context, appWidgetId = appWidgetId)
     }
 }
 
@@ -131,6 +120,7 @@ private fun ReviewWidgetContent(
     snapshot: WidgetRenderSnapshot,
     selection: WidgetReviewSelection,
     today: LocalDate,
+    appWidgetId: Int?,
 ) {
     val openReviewDestination =
         widgetLaunchAction(context, WidgetLaunchTarget.OpenDestination(WidgetDestination.DAILY_REVIEW))
@@ -155,11 +145,11 @@ private fun ReviewWidgetContent(
             titleClick = titleAction,
             badgeText = positionBadge,
             trailing = {
-                if (snapshot.availability == WidgetSnapshotAvailability.READY && selection.total > 1) {
+                if (appWidgetId != null && snapshot.availability != WidgetSnapshotAvailability.REDACTED) {
                     WidgetActionIconButton(
                         iconRes = R.drawable.ic_widget_refresh,
-                        contentDescription = context.getString(R.string.widget_review_next),
-                        onClick = actionRunCallback<CycleWidgetReviewAction>(actionParametersOf()),
+                        contentDescription = context.getString(R.string.widget_review_refresh),
+                        onClick = actionSendBroadcast(reviewWidgetRefreshIntent(context, appWidgetId)),
                         sizeDp = 30.dp,
                         iconSizeDp = 16.dp,
                     )
@@ -228,7 +218,10 @@ private fun ReviewWidgetBody(
                             .fillMaxSize()
                             .background(WidgetLayeredCardSurface)
                             .cornerRadius(WidgetCardCornerRadius)
-                            .clickable(widgetLaunchAction(context, WidgetLaunchTarget.OpenMemo(item.id)))
+                            .clickable(
+                                onClick = widgetLaunchAction(context, WidgetLaunchTarget.OpenMemo(item.id)),
+                                rippleOverride = R.drawable.widget_scroll_feedback,
+                            )
                             .padding(12.dp),
                     ) {
                         Row(

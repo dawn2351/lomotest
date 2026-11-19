@@ -15,8 +15,24 @@ internal fun HandleMigrationOperationState(
     val message =
         when (operationState) {
             SettingsMigrationOperationState.Idle -> null
+
             is SettingsMigrationOperationState.Running -> null
+
             is SettingsMigrationOperationState.Success -> migrationSuccessMessage(operationState)
+
+            is SettingsMigrationOperationState.ExternalNotesImported -> {
+                val summary = operationState.summary
+                if (summary.omittedAttachmentCount == 0) {
+                    stringResource(R.string.settings_migration_external_imported, summary.noteCount)
+                } else {
+                    stringResource(
+                        R.string.settings_migration_external_imported_without_attachments,
+                        summary.noteCount,
+                        summary.omittedAttachmentCount,
+                    )
+                }
+            }
+
             is SettingsMigrationOperationState.Error -> operationState.message
         }
     LaunchedEffect(operationState) {

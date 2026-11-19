@@ -1,13 +1,20 @@
 package com.lomo.app.feature.settings
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.lomo.app.R
 import com.lomo.domain.model.ThemeMode
+import com.lomo.ui.component.common.LomoTextButton
 import com.lomo.ui.component.settings.PreferenceItem
 import com.lomo.ui.component.settings.SettingsGroup
 import com.lomo.ui.component.settings.SwitchPreferenceItem
@@ -66,10 +73,12 @@ fun MigrationSettingsSection(
     operationState: SettingsMigrationOperationState,
     onExportNotesArchive: () -> Unit,
     onImportNotesArchive: () -> Unit,
+    externalPickers: MigrationPickerActions,
     onOpenExportSettingsPasswordDialog: () -> Unit,
     onOpenImportSettingsPasswordDialog: () -> Unit,
 ) {
     val running = operationState is SettingsMigrationOperationState.Running
+    var showWeReadImport by rememberSaveable { mutableStateOf(false) }
     SettingsGroup(title = stringResource(R.string.settings_group_migration)) {
         item {
             PreferenceItem(
@@ -91,6 +100,24 @@ fun MigrationSettingsSection(
         }
         item {
             PreferenceItem(
+                title = stringResource(R.string.settings_import_flomo),
+                subtitle = stringResource(R.string.settings_import_flomo_hint),
+                icon = LomoIcons.Download,
+                enabled = !running,
+                onClick = externalPickers.importFlomo,
+            )
+        }
+        item {
+            PreferenceItem(
+                title = stringResource(R.string.settings_import_weread),
+                subtitle = stringResource(R.string.settings_import_weread_hint),
+                icon = LomoIcons.Download,
+                enabled = !running,
+                onClick = { showWeReadImport = true },
+            )
+        }
+        item {
+            PreferenceItem(
                 title = stringResource(R.string.settings_migration_export_settings),
                 subtitle = stringResource(R.string.settings_migration_export_settings_subtitle),
                 icon = LomoIcons.Lock,
@@ -108,6 +135,46 @@ fun MigrationSettingsSection(
             )
         }
     }
+    if (showWeReadImport) {
+        WeReadImportDialog(
+            onDismiss = { showWeReadImport = false },
+            onImportText = { text ->
+                showWeReadImport = false
+                externalPickers.importWeReadText(text)
+            },
+            onOpenFile = {
+                showWeReadImport = false
+                externalPickers.importWeRead()
+            },
+        )
+    }
+}
+
+@Composable
+private fun WeReadImportDialog(onDismiss: () -> Unit, onImportText: (String) -> Unit, onOpenFile: () -> Unit) {
+    var text by rememberSaveable { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_import_weread)) },
+        text = {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                label = { Text(stringResource(R.string.settings_import_weread_hint)) },
+                minLines = 4,
+                maxLines = 8,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        dismissButton = {
+            LomoTextButton(onClick = onOpenFile) { Text(stringResource(R.string.settings_import_choose_txt)) }
+        },
+        confirmButton = {
+            LomoTextButton(onClick = { onImportText(text) }, enabled = text.isNotBlank()) {
+                Text(stringResource(R.string.settings_import_confirm))
+            }
+        },
+    )
 }
 
 @Composable
