@@ -8,14 +8,22 @@ import android.graphics.Bitmap
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.GraphicsContext
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.content.FileProvider
 import com.lomo.app.R
 import com.lomo.app.feature.common.PendingUiEvent
 import com.lomo.app.util.requireSuccessfulPngEncode
 import com.lomo.domain.usecase.DefaultDispatcherProvider
 import com.lomo.domain.usecase.DispatcherProvider
+import com.lomo.ui.theme.AppSpacing
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.OutputStream
@@ -54,11 +62,31 @@ interface StatisticsPngSource {
 }
 
 internal suspend fun captureStatisticsPngSource(
-    graphicsLayer: GraphicsLayer,
-    dispatcherProvider: DispatcherProvider = DefaultDispatcherProvider(),
+    contentLayer: GraphicsLayer,
+    graphicsContext: GraphicsContext,
+    density: Density,
+    layoutDirection: LayoutDirection,
+    backgroundColor: Color,
 ): StatisticsPngSource {
-    val bitmap = graphicsLayer.toImageBitmap().asAndroidBitmap()
-    return BitmapStatisticsPngSource(bitmap, dispatcherProvider)
+    val sidePadding = with(density) { AppSpacing.Large.roundToPx() }
+    val contentSize = contentLayer.size
+    check(contentSize.width > 0 && contentSize.height > 0) { "Statistics content has not been drawn" }
+    val exportLayer = graphicsContext.createGraphicsLayer()
+    try {
+        exportLayer.record(
+            density = density,
+            layoutDirection = layoutDirection,
+            size = IntSize(contentSize.width + 2 * sidePadding, contentSize.height),
+        ) {
+            drawRect(backgroundColor)
+            translate(left = sidePadding.toFloat()) {
+                drawLayer(contentLayer)
+            }
+        }
+        return BitmapStatisticsPngSource(exportLayer.toImageBitmap().asAndroidBitmap())
+    } finally {
+        graphicsContext.releaseGraphicsLayer(exportLayer)
+    }
 }
 
 private class BitmapStatisticsPngSource(

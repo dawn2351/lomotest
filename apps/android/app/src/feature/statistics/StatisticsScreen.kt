@@ -34,6 +34,9 @@ import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalGraphicsContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lomo.app.R
@@ -82,12 +85,24 @@ fun StatisticsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val screenshotLayer = rememberGraphicsLayer()
+    val graphicsContext = LocalGraphicsContext.current
+    val density = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
+    val exportBackground = MaterialTheme.colorScheme.surface
     val shareScope = rememberCoroutineScope()
     val shareCurrentPage: () -> Unit = {
         haptic.medium()
         shareScope.launch {
             try {
-                viewModel.shareStatisticsImage(captureStatisticsPngSource(screenshotLayer))
+                viewModel.shareStatisticsImage(
+                    captureStatisticsPngSource(
+                        contentLayer = screenshotLayer,
+                        graphicsContext = graphicsContext,
+                        density = density,
+                        layoutDirection = layoutDirection,
+                        backgroundColor = exportBackground,
+                    ),
+                )
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {

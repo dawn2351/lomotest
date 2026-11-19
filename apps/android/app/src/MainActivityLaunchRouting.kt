@@ -1,5 +1,7 @@
 package com.lomo.app
 
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,6 +21,13 @@ enum class WidgetDestination {
     DAILY_REVIEW,
     STATISTICS,
 }
+
+internal fun createOpenDestinationIntent(context: Context, destination: WidgetDestination): Intent =
+    Intent(context, MainActivity::class.java).apply {
+        action = MainActivity.ACTION_OPEN_DESTINATION
+        putExtra(MainActivity.EXTRA_WIDGET_DESTINATION, destination.name)
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+    }
 
 internal data class PendingWidgetNavigationRequest(val id: Long, val destination: WidgetDestination)
 

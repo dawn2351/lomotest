@@ -306,10 +306,11 @@
     <string name="tile_new_memo_label">新建备忘录</string>
     <string name="tile_start_recording_label">开始录音</string>
     <string name="tile_stop_recording_label">停止录音</string>
-    <string name="shortcut_new_memo_short_label">新建备忘录</string>
-    <string name="shortcut_new_memo_long_label">创建一条新备忘录</string>
-    <string name="shortcut_start_recording_short_label">开始录音</string>
-    <string name="shortcut_start_recording_long_label">开始录制音频</string>
+    <string name="shortcut_new_memo_short_label">新建笔记</string>
+    <string name="shortcut_new_memo_long_label">新建笔记</string>
+    <string name="shortcut_start_recording_short_label">录音</string>
+    <string name="shortcut_start_recording_long_label">录音</string>
+    <string name="shortcut_search_label">搜索</string>
     
     <!-- Share -->
     <string name="copied_to_clipboard">已复制到剪贴板</string>
@@ -588,6 +589,8 @@
 
     <!-- About Group -->
     <string name="settings_group_about">关于</string>
+    <string name="settings_about_intro_title">软件介绍</string>
+    <string name="settings_about_intro_description">Lomo 是一款本地优先的备忘录应用。你可以快速记下文字或语音，用标签整理笔记，也可以回顾以往的记录。笔记以 Markdown 文件保存在你选择的文件夹中。</string>
     <string name="settings_current_version">当前版本</string>
     <string name="settings_current_version_unknown">版本未知</string>
     <string name="settings_github">项目主页</string>

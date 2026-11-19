@@ -278,6 +278,14 @@ fun AboutSettingsSection(
     SettingsGroup(title = stringResource(R.string.settings_group_about)) {
         item {
             PreferenceItem(
+                title = stringResource(R.string.settings_about_intro_title),
+                subtitle = stringResource(R.string.settings_about_intro_description),
+                icon = LomoIcons.Info,
+                showChevron = false,
+            )
+        }
+        item {
+            PreferenceItem(
                 title = stringResource(R.string.settings_current_version),
                 subtitle =
                 state.currentVersion.takeIf { it.isNotBlank() }
