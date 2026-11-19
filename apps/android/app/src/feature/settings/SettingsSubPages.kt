@@ -42,7 +42,6 @@ internal fun SyncBackupSettingsPage(
     onOpenSyncCenter: (() -> Unit)? = null,
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    val subPageMigrationPickers = rememberMigrationPickersForSubPages(migrationPickers = migrationPickers)
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -63,7 +62,7 @@ internal fun SyncBackupSettingsPage(
             features = features,
             dialogOptions = dialogOptions,
             storagePickers = storagePickers,
-            migrationPickers = subPageMigrationPickers,
+            migrationPickers = migrationPickers,
         )
     }
 }
@@ -76,7 +75,7 @@ private fun SyncBackupSettingsBody(
     features: SettingsFeatures,
     dialogOptions: SettingsDialogOptions,
     storagePickers: StoragePickerActions,
-    migrationPickers: MigrationPickers,
+    migrationPickers: MigrationPickerActions,
     onOpenSyncCenter: (() -> Unit)? = null,
 ) {
     val gitSyncIntervalLabels = remember(dialogOptions.gitSyncIntervalLabels) {
@@ -131,8 +130,7 @@ private fun SyncBackupSettingsBody(
         // Migration (Export/Import)
         MigrationSettingsSection(
             operationState = migrationOperationState,
-            onExportNotesArchive = migrationPickers.onExportNotesArchive,
-            onImportNotesArchive = migrationPickers.onImportNotesArchive,
+            migrationPickers = migrationPickers,
             onOpenExportSettingsPasswordDialog = {
                 dialogState.migrationPasswordInput = ""
                 dialogState.showMigrationExportSettingsPasswordDialog = true
@@ -299,18 +297,6 @@ internal fun InteractionSecuritySettingsPage(
         }
     }
 }
-
-data class MigrationPickers(val onExportNotesArchive: () -> Unit, val onImportNotesArchive: () -> Unit)
-
-@Composable
-private fun rememberMigrationPickersForSubPages(migrationPickers: MigrationPickerActions): MigrationPickers =
-    remember(migrationPickers) {
-        MigrationPickers(
-            onExportNotesArchive = migrationPickers.exportNotesArchive,
-            onImportNotesArchive = migrationPickers.importNotesArchive,
-            externalPickers = migrationPickers,
-        )
-    }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
